@@ -30,7 +30,7 @@ Integrantes:
 **
 </center>
 
-<div style="page-break-after: always; visibility: hidden">\pagebreak</div>
+<div style="page-break-after: always; visibility: hidden"></div>
 
 Sistema *Generador de Backup y Prueba de Restauración*
 
@@ -43,7 +43,7 @@ Versión *1.0*
 |Versión|Hecha por|Revisada por|Aprobada por|Fecha|Motivo|
 |1\.0|IASR / JSCM|Ing. P. Cuadros|Ing. P. Cuadros|27/03/2026|Versión Original|
 
-<div style="page-break-after: always; visibility: hidden">\pagebreak</div>
+<div style="page-break-after: always; visibility: hidden"></div>
 
 # **INDICE GENERAL**
 
@@ -71,7 +71,7 @@ Versión *1.0*
 
 [6. Conclusiones](#_Toc52661357)
 
-<div style="page-break-after: always; visibility: hidden">\pagebreak</div>
+<div style="page-break-after: always; visibility: hidden"></div>
 
 **<u>Informe de Factibilidad</u>**
 
@@ -93,7 +93,7 @@ Versión *1.0*
 
     1.4. Objetivos
 
-        1.4.1 Objetivo general
+       1.4.1 Objetivo general
 
     Desarrollar una solución de software que optimice y automatice la gestión de copias de seguridad de una base de datos SQL Server, permitiendo identificar, capturar y validar la integridad de los respaldos en un entorno controlado, con trazabilidad completa mediante auditoría de operaciones.
 
@@ -106,7 +106,7 @@ Versión *1.0*
     - Configurar un sistema de auditoría que registre automáticamente el historial de operaciones (quién, cuándo y qué acción realizó).
     - Desarrollar una interfaz gráfica amigable (GUI) en Python que permita gestionar el ciclo de vida de los backups sin conocimientos avanzados de SQL.
 
-<div style="page-break-after: always; visibility: hidden">\pagebreak</div>
+<div style="page-break-after: always; visibility: hidden"></div>
 
 2. <span id="_Toc52661347" class="anchor"></span>**Riesgos**
 
@@ -123,7 +123,7 @@ Versión *1.0*
     | Humano         | Abandono del proyecto por parte de un integrante                  | Baja         | Documentar todo el código y mantener repositorio actualizado para continuidad.                    |
     | Operativo      | Pérdida de los registros de auditoría                             | Baja         | Almacenar logs en una tabla dedicada con escritura protegida y respaldo separado.                 |
 
-<div style="page-break-after: always; visibility: hidden">\pagebreak</div>
+<div style="page-break-after: always; visibility: hidden"></div>
 
 3. <span id="_Toc52661348" class="anchor"></span>**Análisis de la Situación actual**
 
@@ -150,7 +150,7 @@ Versión *1.0*
 
     **Justificación tecnológica:** SQL Server fue seleccionado por su integración nativa con instrucciones T-SQL de backup/restore, su compatibilidad con entornos Windows y su licencia Developer Edition gratuita para uso académico. Python fue elegido por su amplia disponibilidad de librerías de automatización (pyodbc, schedule) y su capacidad para construir interfaces gráficas multiplataforma con tkinter o PyQt5. GitHub facilita el trabajo colaborativo y el control de versiones del código fuente.
 
-<div style="page-break-after: always; visibility: hidden">\pagebreak</div>
+<div style="page-break-after: always; visibility: hidden"></div>
 
 4. <span id="_Toc52661349" class="anchor"></span>**Estudio de Factibilidad**
 
@@ -260,7 +260,7 @@ Versión *1.0*
     - **Impacto ambiental directo:** No se utilizan recursos naturales físicos en el desarrollo del sistema. El proyecto no genera emisiones, vertimientos ni residuos sólidos de impacto ambiental significativo.
     - **Gestión documental digital:** Se priorizó el uso de documentación digital y almacenamiento en la nube (GitHub, Google Drive) para minimizar el consumo de papel. El uso de impresión quedará restringido a la entrega física final del informe académico.
 
-<div style="page-break-after: always; visibility: hidden">\pagebreak</div>
+<div style="page-break-after: always; visibility: hidden"></div>
 
 5. <span id="_Toc52661356" class="anchor"></span>**Análisis Financiero**
 
@@ -316,7 +316,7 @@ Versión *1.0*
 
     La TIR (60.2 %) es significativamente mayor que el COK (10 %), lo que demuestra que el proyecto es altamente rentable en su primer año de operación. Por lo tanto, el proyecto se **ACEPTA** bajo este criterio.
 
-<div style="page-break-after: always; visibility: hidden">\pagebreak</div>
+<div style="page-break-after: always; visibility: hidden"></div>
 
 6. <span id="_Toc52661357" class="anchor"></span>**Conclusiones**
 
