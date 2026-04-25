@@ -1,3 +1,4 @@
+````markdown name=FD02-Informe-Vision.md
 <center>
 
 ![./media/logo-upt.png](./media/logo-upt.png)
@@ -8,7 +9,7 @@
 
 **Escuela Profesional de Ingeniería de Sistemas**
 
-**Proyecto: Generar backup y prueba de restauración**
+**Proyecto: SQL-SafeBridge: Orquestador de Respaldos y Validación de Integridad (SQL Server)**
 
 Curso: Base de Datos II
 
@@ -31,11 +32,11 @@ Integrantes:
 |CONTROL DE VERSIONES||||||
 | :-: | :- | :- | :- | :- | :- |
 |Versión|Hecha por|Revisada por|Aprobada por|Fecha|Motivo|
-|1.0|IASR, JSCM|IASR, JSCM|PCQL|28/03/2026|Versión Original|
+|1.0|IASR, JSCM|IASR, JSCM|PCQL|28/03/2026|Versión Original (adaptada a SQL-SafeBridge)|
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
-**Sistema: Plataforma Automatizada de Generación de Backups y Validación de Restauración**
+**Sistema: SQL-SafeBridge — Orquestador de Backups y Prueba de Restauración con Validación de Integridad (SQL Server)**
 
 **Documento de Visión**
 
@@ -46,7 +47,7 @@ Integrantes:
 |CONTROL DE VERSIONES||||||
 | :-: | :- | :- | :- | :- | :- |
 |Versión|Hecha por|Revisada por|Aprobada por|Fecha|Motivo|
-|1.0|IASR, JSCM|IASR, JSCM|PCQL|28/03/2026|Versión Original|
+|1.0|IASR, JSCM|IASR, JSCM|PCQL|28/03/2026|Versión Original (adaptada a SQL-SafeBridge)|
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
@@ -120,42 +121,69 @@ Integrantes:
 
 ### 1.1 Propósito
 
-El presente documento de visión establece los requisitos, características y restricciones de la Plataforma Automatizada de Generación de Backups y Validación de Restauración. Este documento tiene como propósito principal proporcionar una visión clara y compartida del proyecto a todos los interesados, incluyendo desarrolladores, administradores de bases de datos, directivos y usuarios finales. El documento sirve como base fundamental para el desarrollo del sistema, asegurando que todas las partes involucradas comprendan los objetivos, alcances y beneficios esperados de la solución propuesta. Asimismo, este documento facilita la toma de decisiones estratégicas durante las fases posteriores del desarrollo, permitiendo alineación constante con los requisitos comerciales y técnicos identificados en esta etapa inicial.
+El presente documento de visión establece los requisitos, características y restricciones del sistema **SQL-SafeBridge: Orquestador de Respaldos y Validación de Integridad (SQL Server)**. Su propósito principal es proporcionar una visión clara y compartida del proyecto a todos los interesados (docente, equipo de desarrollo, administradores de bases de datos, auditores internos y responsables de TI), sirviendo como base para el desarrollo del sistema y asegurando alineación respecto a objetivos, alcances, beneficios esperados y criterios de éxito.
+
+Asimismo, este documento facilita la toma de decisiones estratégicas durante las fases posteriores del desarrollo, manteniendo consistencia con los requisitos técnicos y necesidades reales de continuidad de datos en entornos SQL Server.
 
 ### 1.2 Alcance
 
-El alcance del proyecto abarca el desarrollo de una plataforma automatizada que integre las siguientes capacidades funcionales: generación automática de backups de bases de datos, validación de integridad de los backups generados, ejecución de pruebas de restauración en entornos controlados, y registro detallado de auditoría de todas las operaciones realizadas. La plataforma soportará motores de bases de datos relacionales tanto SQL Server como Oracle, proporcionando compatibilidad multi-motor. El desarrollo técnico incluirá una capa de aplicación implementada en Python o C# según las capacidades disponibles, un módulo de seguridad y auditoría, y una interfaz de usuario intuitiva para la gestión de operaciones. El sistema se enfocará en entornos de bases de datos corporativas y medianas empresas que requieran automatización de procesos críticos de respaldo y recuperación de datos.
+El alcance del proyecto comprende el desarrollo de una **aplicación de escritorio** orientada a entornos SQL Server (instancias locales o remotas) que automatiza el ciclo crítico de **Backup + Restore Test + Validación + Evidencia + Limpieza**, incluyendo:
+
+- Generación de backups (principalmente **FULL**) con nomenclatura automática e inteligente (ej. `BD_YYYYMMDD_HHMMSS_FULL.bak`).
+- Prueba de restauración automática en una base de datos **sandbox/espejo**, utilizando `WITH MOVE` para reubicar archivos físicos `.mdf` y `.ldf`.
+- Auditoría técnica y validación de integridad mediante:
+  - `DBCC CHECKDB` sobre la base restaurada.
+  - Validaciones comparativas básicas (por ejemplo, existencia de objetos críticos y conteos de registros según configuración).
+- Registro de evidencias: archivos `.log` detallados, métricas de tiempo, resultados de cada paso y errores capturados.
+- Actualización en tiempo real en la interfaz (consola de eventos y barras de progreso).
+- Limpieza automática al finalizar (DROP de la base sandbox) para optimizar almacenamiento.
+
+**Tecnologías base dentro del alcance:**
+- Python 3.12+ (orquestación).
+- `customtkinter` (UI moderna).
+- `pyodbc` + ODBC Driver (conectividad SQL Server vía TDS).
+- Patrones de diseño orientados a **Clean Architecture**.
+
+**Fuera de alcance (para esta versión académica):**
+- Soporte multi-motor (por ejemplo Oracle).
+- Portal web / despliegue en nube.
+- Recuperación granular de objetos individuales (object-level recovery) tipo enterprise.
+- Integraciones corporativas avanzadas (SIEM, AD/LDAP, SMS, etc.), salvo que se simulen.
 
 ### 1.3 Definiciones, Siglas y Abreviaturas
 
-- **Backup**: Copia de seguridad de datos y estructuras de bases de datos.
-- **Restauración**: Proceso de recuperación de datos desde un backup hacia el estado original o especificado.
-- **RPO (Recovery Point Objective)**: Punto de objetivo de recuperación; máximo período de tiempo aceptable de pérdida de datos.
-- **RTO (Recovery Time Objective)**: Tiempo objetivo de recuperación; tiempo máximo aceptable para restaurar un sistema.
-- **DBMS**: Sistema de gestión de bases de datos.
-- **SQL Server**: Motor de base de datos relacional de Microsoft.
-- **Oracle**: Motor de base de datos relacional empresarial de Oracle Corporation.
-- **Auditoría**: Registro y monitoreo de operaciones y acciones de usuarios.
-- **Integridad de datos**: Garantía de que los datos permanecen completos, precisos y consistentes.
-- **ACID**: Acrónimo que representa Atomicidad, Consistencia, Aislamiento y Durabilidad.
-- **ETL**: Extraer, Transformar y Cargar datos.
+- **Backup**: Copia de seguridad de una base de datos (en SQL Server, archivo `.bak`).
+- **Restore Test**: Restauración de prueba del backup en una BD sandbox para verificar recuperabilidad.
+- **Sandbox / Espejo**: Base de datos temporal restaurada desde el backup, separada de producción.
+- **RPO (Recovery Point Objective)**: Punto objetivo de recuperación; máximo período aceptable de pérdida de datos.
+- **RTO (Recovery Time Objective)**: Tiempo objetivo de recuperación; máximo tiempo aceptable para restablecer el servicio.
+- **DBCC CHECKDB**: Comando de SQL Server que valida consistencia lógica y física de una base de datos.
+- **TDS**: Tabular Data Stream (protocolo de comunicación usado por SQL Server).
+- **ODBC**: Open Database Connectivity (estándar para conectividad a bases de datos).
 - **GUI**: Interfaz gráfica de usuario.
-- **API**: Interfaz de programación de aplicaciones.
+- **Clean Architecture**: Enfoque de arquitectura que separa UI, casos de uso, entidades e infraestructura.
+- **DBA**: Database Administrator (Administrador de Bases de Datos).
+- **Sysadmin**: Rol de servidor en SQL Server con privilegios administrativos máximos.
 
 ### 1.4 Referencias
 
 Los siguientes documentos y estándares son referencias relevantes para este proyecto:
 
 - Microsoft SQL Server Documentation: Backup and Restore (https://learn.microsoft.com/en-us/sql/)
-- Oracle Database Backup and Recovery Documentation (https://docs.oracle.com/en/database/)
-- ISO/IEC 27001:2022 - Información Security Management Systems
-- NIST Cybersecurity Framework versión 1.1
+- Microsoft SQL Server Documentation: DBCC CHECKDB (https://learn.microsoft.com/en-us/sql/)
+- ISO/IEC 27001:2022 - Information Security Management Systems (referencia de buenas prácticas)
 - IEEE 830-1998 - Recommended Practice for Software Requirements Specifications
 - Estándares de Ingeniería de Software de la Universidad Privada de Tacna
 
 ### 1.5 Visión General
 
-La Plataforma Automatizada de Generación de Backups y Validación de Restauración representa una solución integral y moderna para gestionar operaciones críticas de respaldo y recuperación de datos en entornos corporativos. La visión del sistema es proporcionar una herramienta confiable, automatizada y monitoreada que minimize la intervención manual en procesos repetitivos y propensos a error, garantizando la disponibilidad de datos empresariales mediante validación continua de la capacidad de recuperación. La plataforma integra tecnologías modernas en arquitectura de software, seguridad de la información y automatización inteligente para crear un entorno robusto donde los administradores de bases de datos puedan enfocarse en estrategias de resiliencia en lugar de tareas operativas. A través de un registro completo de auditoría y métricas detalladas, el sistema proporciona visibilidad completa sobre el estado de la infraestructura de respaldo, cumplimiento normativo y continuidad del negocio.
+**SQL-SafeBridge** es una solución de escritorio diseñada para que la seguridad de los datos no dependa únicamente de “tener un backup”, sino de contar con **evidencia automática de que dicho backup es restaurable y consistente**. La visión del sistema es convertir un proceso manual y propenso a errores (backup/restauración) en un flujo orquestado, repetible y auditable.
+
+La herramienta busca brindar al DBA una estación de trabajo moderna que permita:
+- Ejecutar respaldos con parámetros seguros y consistentes.
+- Restaurar inmediatamente el backup en un entorno temporal.
+- Verificar integridad con `DBCC CHECKDB` y validaciones adicionales.
+- Registrar evidencias completas de lo sucedido (quién, cuándo, qué, resultado).
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
@@ -163,15 +191,29 @@ La Plataforma Automatizada de Generación de Backups y Validación de Restauraci
 
 ### 2.1 Oportunidad de negocio
 
-En la actualidad, las organizaciones enfrentan desafíos significativos en la gestión de operaciones de respaldo y recuperación de datos. Los procesos manuales generan cuellos de botella operativos, incrementan la probabilidad de errores humanos y consumen recursos valiosos de personal especializado. Estudios recientes demuestran que aproximadamente el 60% de las organizaciones no realizan pruebas regulares de restauración, desconociendo si sus backups son realmente viables en caso de incidente catastrófico. Esta brecha crítica representa una vulnerabilidad significativa que expone a las empresas a riesgos de pérdida irrecuperable de datos.
+En muchas organizaciones y entornos académicos, los respaldos aún se gestionan de manera manual en SSMS. En la práctica, esto genera dos problemas críticos: (1) ejecución irregular o no estandarizada, y (2) ausencia de pruebas de restauración, lo cual produce “backups de fe” (se asume que sirven, pero no se comprueba).
 
-La oportunidad de negocio radica en proporcionar una solución automatizada que elimine esta vulnerabilidad mediante la ejecución programada de backups validados y pruebas de restauración. Para el segmento de mercado objetivo (empresas medianas con infraestructura de bases de datos crítica), la implementación de esta plataforma genera valor demostrable mediante reducción de costos operativos en personal, disminución de riesgos de indisponibilidad de datos, y garantía de cumplimiento normativo en regulaciones de protección de datos y continuidad del negocio. La capacidad de proporcionar reportes detallados, métricas de RPO/RTO y trazabilidad completa a través de auditoría genera confianza en stakeholders y cumple requisitos de gobernanza corporativa cada vez más exigentes.
+La oportunidad de negocio (y de valor) de SQL-SafeBridge consiste en ofrecer una solución que reduzca el riesgo operativo mediante:
+
+- Automatización del ciclo de continuidad (backup + restore test).
+- Validación técnica inmediata (CHECKDB + pruebas básicas).
+- Evidencia auditable con métricas reales de duración y resultados.
+- Estándares de nomenclatura, retención y limpieza.
+
+En el segmento objetivo (DBAs, equipos TI y entornos educativos con SQL Server), esta herramienta genera valor por reducción de errores, ahorro de tiempo operativo y mejora de cumplimiento y trazabilidad.
 
 ### 2.2 Definición del problema
 
-El problema central que aborda este proyecto es la falta de automatización integral y verificación continua de procesos críticos de respaldo y recuperación de datos. Las organizaciones actuales enfrentan múltiples desafíos técnicos y operativos: la gestión manual de backups es propensa a errores y omisiones, no existe mecanismo sistemático para validar que los backups generados sean realmente recuperables hasta que ocurre un incidente real, la falta de auditoría detallada impide identificar responsabilidades y patrones de comportamiento, la ausencia de integración multi-motor crea sillos de información que dificultan la administración centralizada, y la inexistencia de métricas cuantificables sobre RPO/RTO genera incertidumbre sobre la capacidad real de recuperación ante desastres.
+El problema central es la falta de verificación continua sobre la recuperabilidad real de los backups y la dependencia de procedimientos manuales.
 
-Específicamente, administradores de bases de datos gastan entre 15% y 25% de su tiempo en operaciones rutinarias de backup que podrían automatizarse, mientras que pruebas de restauración se realizan infrecuentemente debido a su complejidad manual. Cuando ocurren incidentes, la falta de confianza previa en la viabilidad de backups prolonga tiempos de recuperación significativamente. Regulaciones como GDPR, CCPA y estándares de auditoría interna requieren demostrabilidad de capacidad de recuperación y trazabilidad de operaciones de datos sensibles, requisitos que sistemas manuales no satisfacen adecuadamente. La solución propuesta aborda estos problemas mediante automatización inteligente, validación continua y auditoría integral que genera confianza demostrativa en la infraestructura de respaldo y recuperación.
+En particular, se presentan las siguientes situaciones:
+
+- **Backups generados sin prueba de restauración**, por lo que no existe certeza de que funcionarán en un incidente real.
+- **Alta probabilidad de error humano** al escribir comandos T-SQL manualmente (rutas, nombres, opciones).
+- **Escasa trazabilidad**: se desconoce quién ejecutó una operación, qué parámetros usó o cuál fue el resultado.
+- **Falta de métricas reales**: no se mide el tiempo de backup y restore para estimar RTO.
+
+SQL-SafeBridge resuelve esto mediante orquestación y validación automática con evidencias, elevando la confiabilidad del proceso.
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
@@ -179,45 +221,48 @@ Específicamente, administradores de bases de datos gastan entre 15% y 25% de su
 
 ### 3.1 Resumen de los interesados
 
-Los interesados en este proyecto incluyen: administradores de bases de datos que requieren herramientas para optimizar gestión de respaldo; directivos de tecnología que necesitan reducir riesgos y costos operativos; auditores internos que demandan trazabilidad y cumplimiento normativo; gerentes de seguridad de información que buscan fortalecer postura de resiliencia; usuarios administrativos que requieren visibilidad sobre estado de backups; y equipos de desarrollo que necesitan entornos de prueba con datos validados. Cada grupo de interesados tiene perspectivas y prioridades distintas que deben ser satisfechas mediante características específicas y capacidades de reporte diferenciadas.
+- **Administradores de Base de Datos (DBA):** usuarios principales; configuran, ejecutan y validan respaldos.
+- **Equipo de TI / Soporte:** necesita continuidad operativa y procedimientos repetibles.
+- **Área de Auditoría/Control Interno (cuando aplique):** requiere evidencia de operaciones y trazabilidad.
+- **Docente y jurado académico:** evalúan documentación, ingeniería aplicada y cumplimiento del alcance.
+- **Usuarios finales del sistema de información (indirectos):** se benefician de mayor disponibilidad y menor riesgo.
 
 ### 3.2 Resumen de los usuarios
 
-Los usuarios directos del sistema comprenden: administradores de bases de datos (DBAs) senior y junior que utilizarán la plataforma para configurar, monitorear y ejecutar operaciones de respaldo; analistas de recuperación ante desastres que validarán planes de continuidad; especialistas en seguridad de información que auditorarán y analizarán registros de operaciones; y directivos técnicos que consultarán reportes ejecutivos y métricas de desempeño. Cada perfil de usuario interactúa con diferentes componentes del sistema según sus funciones específicas y niveles de autorización.
+- DBA Senior/Junior: ejecutan backups, restore test y revisan reportes.
+- Analista de continuidad: revisa evidencia y métricas.
+- Auditor/Compliance (modo consulta): revisa logs/historial.
 
 ### 3.3 Entorno de usuario
 
-Los usuarios operarán la plataforma en entornos corporativos con infraestructura de bases de datos distribuida, accediendo desde estaciones de trabajo administrativas conectadas a red corporativa segura. El sistema se desplegará en servidores corporativos bajo control de departamentos de tecnología, con acceso remoto controlado para administración. La plataforma debe operar continuamente las 24 horas del día durante 7 días de la semana, con capacidad de escalonamiento en horarios de alta demanda. Los usuarios esperan interfaces intuitivas que minimize curva de aprendizaje, junto con documentación técnica completa y soporte especializado disponible.
+- Estaciones de trabajo con Windows (entorno recomendado por SQL Server/SSMS).
+- Conectividad a instancias SQL Server locales o remotas.
+- Rutas de almacenamiento con permisos adecuados (NTFS/compartidos).
+- Operación típica: ventanas de mantenimiento o ejecución en horarios definidos.
 
 ### 3.4 Perfiles de los interesados
 
-**Perfil 1 - Directivo de Tecnología:** Ejecutivo senior responsable de presupuesto de TI, infraestructura y riesgos tecnológicos. Interés principal en reducción de costos operativos, cumplimiento de objetivos de disponibilidad, y minimización de riesgos de incidente. Influencia alta en decisiones de inversión y asignación de recursos.
+**Perfil 1 - Responsable de TI / Infraestructura:** requiere disminución de riesgos y evidencia de continuidad.
 
-**Perfil 2 - Administrador de Base de Datos:** Profesional técnico responsable de operaciones diarias, tuning, seguridad y respaldo de bases de datos. Interés en herramientas que simplifiquen trabajo rutinario y proporcionen visibilidad completa. Influencia media-alta en requisitos técnicos y evaluación de viabilidad.
+**Perfil 2 - DBA:** requiere automatización, control, seguridad y rapidez, con visibilidad del estado.
 
-**Perfil 3 - Auditor Interno:** Especialista en cumplimiento normativo y riesgos corporativos. Interés en evidencia documentada de operaciones, trazabilidad de acciones y cumplimiento de políticas. Influencia media en requisitos de auditoría y reportes.
-
-**Perfil 4 - Especialista en Seguridad:** Profesional responsable de protección de información y cumplimiento de estándares de seguridad. Interés en validación de integridad, control de acceso, y auditoría de operaciones sensibles. Influencia media-alta en requisitos de seguridad.
+**Perfil 3 - Auditor / Control:** requiere trazabilidad: quién, cuándo, qué, resultados.
 
 ### 3.5 Perfiles de los Usuarios
 
-**Usuario Tipo 1 - DBA Senior:** Profesional con 5+ años de experiencia en administración de bases de datos SQL Server u Oracle. Conocimiento profundo de arquitecturas de backup, recovery y disaster recovery. Requiere herramientas avanzadas con opciones de personalización. Expectativa de soporte técnico especializado y capacidad de integración con sistemas legacy.
+**Usuario Tipo 1 - DBA Senior:** requiere flexibilidad (rutas, opciones, exclusiones, configuración avanzada).
 
-**Usuario Tipo 2 - DBA Junior:** Profesional con 0-3 años de experiencia. Conocimiento intermedio de bases de datos. Requiere interfaces claras con guías paso-a-paso y validación de acciones críticas. Expectativa de capacitación formal y documentación extensiva.
+**Usuario Tipo 2 - DBA Junior:** requiere guía paso a paso, UI clara, validaciones y mensajes entendibles.
 
-**Usuario Tipo 3 - Analista de Disaster Recovery:** Especialista en planes de continuidad y recuperación ante desastres. Requiere capacidad de simular escenarios de recuperación y generar reportes de RPO/RTO. Interés en métricas de validación de restauración.
-
-**Usuario Tipo 4 - Auditor/Compliance Officer:** Profesional responsable de verificación de cumplimiento. Requiere acceso a reportes detallados de auditoría, registros inmutables de operaciones, y capacidad de demostrar trazabilidad. No requiere acceso operativo directo, solo consulta de información.
+**Usuario Tipo 3 - Auditor/Docente (consulta):** requiere reportes, historial y evidencias descargables.
 
 ### 3.6 Necesidades de los interesados y usuarios
 
-Los administradores de bases de datos necesitan capacidad de automatizar backups repetitivos reduciendo intervención manual, ejecutar pruebas de restauración sin afectar producción, monitorear estado de operaciones en tiempo real, y recibir alertas proactivas ante anomalías. Requieren documentación técnica completa sobre configuración, troubleshooting y mejores prácticas implementadas en la plataforma.
-
-Los directivos de tecnología necesitan visibilidad ejecutiva sobre cumplimiento de objetivos de RPO/RTO, análisis de costos-beneficio de la implementación, alineación con objetivos de continuidad del negocio, y demostrabilidad de reducción de riesgos ante reguladores externos. Requieren reportes automáticos periódicos sin necesidad de intervención técnica.
-
-Los auditores internos necesitan acceso a registros inmutables y completos de todas las operaciones de respaldo y restauración, capacidad de filtrar por usuario/fecha/tipo de operación, generación de reportes de conformidad, y evidencia de validación de integridad de datos. Requieren seguridad de acceso que impida modificación de registros de auditoría.
-
-Los especialistas en seguridad necesitan validación de que los procesos cumplen estándares de seguridad (ISO 27001, NIST), cifrado de datos en tránsito y en reposo, control granular de acceso basado en roles, y mecanismos de prevención de acceso no autorizado a datos sensibles. Requieren integración con sistemas de gestión de identidades corporativos.
+- Automatizar ejecución y reducir errores manuales.
+- Garantizar que el backup sea restaurable (restore test).
+- Validar consistencia (CHECKDB) y mantener evidencia.
+- Minimizar impacto en producción con sandbox y limpieza.
+- Permitir control de acceso: habilitar funciones solo a usuarios autorizados (por rol en SQL Server).
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
@@ -225,183 +270,138 @@ Los especialistas en seguridad necesitan validación de que los procesos cumplen
 
 ### 4.1 Perspectiva del producto
 
-La Plataforma Automatizada de Generación de Backups y Validación de Restauración se posiciona como solución de software empresarial que actúa como capa de orquestación y validación entre aplicaciones corporativas, motores de bases de datos y sistemas de almacenamiento. Desde perspectiva arquitectónica, el sistema funciona como componente crítico de infraestructura que no reemplaza sino complementa capacidades nativas de los motores de base de datos, proporcionando automatización inteligente, coordinación centralizada y validación proactiva.
+SQL-SafeBridge actúa como una capa de orquestación entre el DBA y SQL Server, sin reemplazar las capacidades nativas del motor; las utiliza y las hace seguras, repetibles y auditables.
 
-La plataforma opera como intermediario confiable que recibe solicitudes de configuración desde administradores, coordina ejecución de operaciones contra sistemas heterogéneos (SQL Server, Oracle), valida resultados mediante pruebas de restauración en entornos aislados, registra todas las operaciones en auditoría inmutable, y genera reportes de conformidad y métricas de desempeño. El sistema proporciona abstracción de complejidad técnica subyacente, permitiendo que usuarios con diferentes niveles de expertise operen operaciones complejas mediante interfaces intuitivas.
-
-La perspectiva del producto integra tres capas funcionales principales: capa de presentación que proporciona interfaz web moderna, capa de lógica de negocio que orquesta operaciones complejas en Python o C#, y capa de datos que interactúa directamente con motores de base de datos target y sistemas de almacenamiento de backups. La arquitectura subyacente enfatiza modularidad, escalabilidad horizontal, resilencia ante fallos, y capacidad de auditoría integral.
+Arquitectura propuesta (alto nivel):
+- **UI Layer:** aplicación de escritorio (customtkinter) con consola de eventos, progreso y configuración.
+- **Use Case Layer:** orquestación del flujo (backup → restore test → validación → evidencia → limpieza).
+- **Infrastructure Layer:** ejecución de T-SQL y conectividad (pyodbc).
+- **Entity Layer:** modelos de ejecución, reportes, estados, eventos y resultados.
 
 ### 4.2 Resumen de capacidades
 
-**Generación Automatizada de Backups:** Capacidad de programar ejecución de backups en horarios definidos, soportar múltiples estrategias (full, incremental, diferencial), adaptar parámetros de backup según políticas corporativas, y registrar cada ejecución con metadatos completos. Sistema notifica estado de ejecución y resultados inmediatamente después de completarse cada operación.
-
-**Validación de Integridad:** Capacidad de ejecutar verificación de integridad de backups generados mediante checksums criptográficos, identificar backups corruptos o incompletos antes de almacenamiento final, y rechazar automáticamente backups que no cumplan criterios de validación. Sistema mantiene historial de validaciones realizadas para auditoría.
-
-**Pruebas de Restauración:** Capacidad de ejecutar restauraciones de prueba en entornos aislados sin afectar bases de datos de producción, simular escenarios de recuperación ante desastres, validar que datos restaurados son íntegros y accesibles, y medir tiempos reales de recuperación (RTO) alcanzados. Sistema automatiza setup de ambientes de prueba, ejecución de restauración y rollback.
-
-**Auditoría y Compliance:** Capacidad de registrar todas las operaciones (quién, qué, cuándo, por qué, resultado), generar reportes de cumplimiento normativo, demostrar trazabilidad ante reguladores, y mantener registros inmutables y protegidos contra modificación. Sistema integra auditoría en cada operación sin impacto en desempeño.
-
-**Soporte Multi-Motor:** Capacidad de operar con múltiples motores de base de datos (SQL Server, Oracle) mediante abstracción de diferencias técnicas, aplicar políticas consistentes independientemente del motor, y administrar infraestructura heterogénea desde interfaz unificada.
-
-**Monitoreo y Alertas:** Capacidad de monitoreo continuo del estado de operaciones de backup, alertas proactivas ante anomalías o fallos, integración con sistemas de notificación corporativos (email, SMS, integraciones webhook), y dashboards en tiempo real de estado de infraestructura.
-
-**Reportes y Métricas:** Capacidad de generar reportes ejecutivos, técnicos y de conformidad, métricas cuantificables de RPO/RTO alcanzados, análisis de tendencias históricas, y visualización de datos mediante gráficos y dashboards interactivos.
+- **Gestión de conexión segura:** credenciales ingresadas por el usuario; verificación de permisos (p. ej., sysadmin).
+- **Generación automática de backups FULL:** con naming estándar y parámetros seguros.
+- **Restauración sandbox inmediata:** restauración del `.bak` en una BD temporal evitando conflicto de archivos con `WITH MOVE`.
+- **Validación técnica:** `DBCC CHECKDB` y verificaciones comparativas configurables.
+- **Evidencias y trazabilidad:** logs por ejecución, métricas de tiempo y resultados.
+- **Limpieza automática:** eliminación de BD sandbox al finalizar o ante cancelación controlada.
+- **UI en tiempo real:** progreso, estados, consola y reportes.
 
 ### 4.3 Suposiciones y dependencias
 
-**Suposiciones Técnicas:** Se asume que motores de base de datos SQL Server y Oracle están instalados y operacionales en la infraestructura corporativa. Se asume disponibilidad de recursos de almacenamiento suficientes para almacenar backups generados. Se asume que la red corporativa proporciona conectividad entre servidores de aplicación y servidores de base de datos. Se asume que repositorios de código (Git) y herramientas de integración continua están disponibles para despliegue de actualizaciones.
+**Suposiciones técnicas:**
+- SQL Server está instalado y accesible.
+- Existe ODBC Driver instalado (por ejemplo ODBC Driver 18 for SQL Server).
+- El usuario cuenta con permisos suficientes (p. ej., sysadmin) para backup/restore.
 
-**Suposiciones Organizacionales:** Se asume que existe personal técnico capacitado disponible para instalación, configuración inicial y administración. Se asume que procesos de cambio corporativos permitirán validación e implementación del sistema. Se asume que política de acceso permitirá integración con sistemas de identidad corporativos. Se asume que presupuesto de infraestructura disponible cubre costos de hardware y software necesarios.
+**Dependencias técnicas:**
+- Python 3.12+, `pyodbc`, `customtkinter`.
+- Disponibilidad de rutas de almacenamiento accesibles por el servicio de SQL Server.
 
-**Dependencias Técnicas:** El sistema depende de disponibilidad continua de motores de base de datos, sistemas de almacenamiento de backups, sistemas de notificación corporativos, y servicios de red. El sistema depende de librerías de open source para conectividad de bases de datos (sqlalchemy, cx_Oracle, pyodbc). Desempeño global depende de configuración y recursos disponibles en infraestructura subyacente.
-
-**Dependencias Organizacionales:** Éxito depende de adopción por usuarios y administradores de bases de datos. Éxito requiere visibilidad ejecutiva y soporte de directivos de tecnología. Reguladores externos pueden imponer cambios en requisitos de auditoría y compliance durante ciclo de desarrollo.
+**Dependencias organizacionales/operativas:**
+- Adopción por usuarios técnicos y disciplina de revisión de evidencias.
+- Disponibilidad de almacenamiento y políticas de retención.
 
 ### 4.4 Costos y precios
 
-El modelo de costos para esta solución comprende componentes de desarrollo inicial, infraestructura de hosting, licencias de software de terceros, y costos de operación y soporte continuo. Costos de desarrollo inicial incluyen resources de ingeniería para diseño, codificación, testing, y documentación de la plataforma. Estimación preliminar de esfuerzo de desarrollo es de 800-1000 horas para desarrolladores, arquitectos y especialistas en QA.
-
-Costos de infraestructura incluyen servidores para hosting de la plataforma (estimado 2-4 servidores virtuales), almacenamiento para backups generados (variable según volumen de datos), y ancho de banda de red. Estimación preliminar es USD 500-1000 mensuales dependiendo de escala de operaciones.
-
-Costos de licencias de software incluyen posibles librerías comerciales de backup avanzado, licencias de bases de datos para entornos de prueba, y herramientas de monitoreo y logging empresarial. Estimación preliminar es USD 200-500 mensuales.
-
-Costos de operación y soporte continuo incluyen personal técnico para mantenimiento, actualizaciones de seguridad, soporte a usuarios, y mejoras continuas. Estimación preliminar es 0.5 FTE (Full Time Equivalent) de ingeniero senior.
-
-El retorno de inversión (ROI) proviene de reducción de horas-persona en operaciones rutinarias (15-20 horas mensuales de DBA), mitigación de riesgos de indisponibilidad de datos (evita costos de crisis), cumplimiento proactivo de regulaciones (evita multas y sanciones), y mejora en confianza de stakeholders. Payback period estimado es 12-18 meses.
+En el contexto académico, el proyecto se desarrolla con herramientas de costo cero en licencias (SQL Server Developer, Python, GitHub). Los costos se asocian principalmente a esfuerzo humano y almacenamiento para respaldo. El retorno se expresa como ahorro de tiempo, reducción de riesgos y aumento de confiabilidad operativa.
 
 ### 4.5 Licenciamiento e instalación
 
-La plataforma se distribuirá bajo licencia corporativa que cubre derechos de uso ilimitado dentro de la organización cliente. Modelo de licenciamiento será perpetuo con costo anual de soporte y actualizaciones. Instalación seguirá procedimiento estándar de despliegue en infraestructura corporativa existente mediante containerización (Docker) para facilitar portabilidad.
-
-Procedimiento de instalación incluye: preparación del entorno (validación de prerrequisitos de hardware y software), descarga e instalación de artefactos de aplicación, configuración de parámetros de ambiente, establecimiento de conectividad con motores de base de datos, inicialización de base de datos de auditoría, y ejecución de test suite de validación. Estimación de tiempo de instalación es 4-8 horas para personal técnico especializado.
-
-Licenciamiento de dependencias de terceros será gestionado bajo open source quando sea posible para minimizar costos. Componentes críticos de backup serán desarrollados internamente o procurados bajo licencias comerciales según evaluación de costo-beneficio. Documentación completa de licencias será mantenida en repositorio de activos de TI corporativo.
+- Distribución prevista como ejecutable `.exe` (por ejemplo, empaquetado con PyInstaller).
+- Dependencia de driver ODBC instalado en el equipo cliente.
+- Instalación simple: ejecutar instalador/portable, configurar conexión y rutas, y operar.
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
 ## Características del producto
 
-La plataforma proporciona un conjunto comprehensivo de características distribuidas en módulos funcionales que trabajan de manera integrada para ofrecer solución de extremo a extremo. A continuación se detallan las características principales organizadas por módulo funcional.
+A continuación se detallan las características principales del sistema SQL-SafeBridge, organizadas en módulos:
 
-**Módulo de Gestión de Políticas de Backup:** Capacidad de definir políticas de backup flexibles que especifiquen: tipo de backup (full, incremental, diferencial), frecuencia de ejecución (horaria, diaria, semanal, mensual), bases de datos objetivo, período de retención de backups, ventanas de tiempo permitidas para ejecución, prioridad de operación, y notificaciones. Sistema soporta herencia de políticas y excepciones para casos especiales. Interfaz visual permite creación intuitiva de políticas sin requerer conocimiento de sintaxis complejas.
+**Módulo 1 — Autenticación y Control de Acceso (delegado a SQL Server):**
+- Ingreso de credenciales SQL Server desde la app.
+- Verificación de permisos/rol (p. ej., sysadmin) antes de habilitar funciones críticas.
+- Bloqueo de funciones si no se cumplen permisos.
 
-**Módulo de Orquestación de Ejecución:** Capacidad de ejecutar backups según cronograma definido, detectar y manejar condiciones de error (espacio insuficiente, conectividad perdida, timeout), implementar mecanismos de retry automático con backoff exponencial, paralizar ejecuciones de acuerdo a prioridades definidas, y registrar cada ejecución con estado detallado. Sistema optimiza utilización de recursos limitados (banda de red, CPU, storage) mediante scheduling inteligente.
+**Módulo 2 — Respaldo (Backup FULL):**
+- Selección de base de datos objetivo.
+- Definición de ruta de almacenamiento.
+- Generación automática de nombre del archivo `.bak`.
+- Captura de tiempo, tamaño y resultado.
 
-**Módulo de Validación de Integridad:** Capacidad de calcular checksums criptográficos de backups generados, comparar checksums con valores almacenados en bitácora para detectar corrupción, ejecutar validaciones sintácticas de estructura de backup, y rechazar automáticamente backups que no cumplan criterios de validación. Sistema mantiene métricas de tasa de validación exitosa.
+**Módulo 3 — Restauración Sandbox (Restore Test):**
+- Creación automática de base temporal con nombre controlado.
+- Lectura de logical files (por ejemplo, `RESTORE FILELISTONLY`) para construir `WITH MOVE`.
+- Restauración y verificación de accesibilidad.
 
-**Módulo de Pruebas de Restauración:** Capacidad de restaurar backups en entornos de sandbox aislados de producción, ejecutar suite de test de validación de datos, medir tiempos de restauración reales, generar reportes de viabilidad de recuperación, y realizar limpieza automática de recursos de prueba. Sistema soporta simulación de diferentes escenarios de fallo para validar capacidad de recuperación ante desastres específicos.
+**Módulo 4 — Validación de Integridad y Consistencia:**
+- Ejecución de `DBCC CHECKDB` en la base restaurada.
+- Validaciones comparativas básicas configurables (conteos, tablas críticas).
+- Marcado del backup como “Validado” o “No Validado” según resultado.
 
-**Módulo de Auditoría e Inmutabilidad:** Capacidad de registrar cada operación en bitácora centralizada con información de usuario, timestamp, operación realizada, parámetros utilizados, y resultado. Sistema implementa mecanismos de protección contra modificación de registros (append-only logs, hash chains), segregación de duties para roles críticos, y alertas ante intentos de acceso no autorizado. Registros de auditoría están disponibles para consulta y generación de reportes de cumplimiento.
+**Módulo 5 — Evidencias y Auditoría:**
+- Log técnico por ejecución (inicio/fin, pasos, errores, métricas).
+- Exportación de evidencias para revisión.
+- Historial local de ejecuciones (según implementación: archivo/DB local).
 
-**Módulo de Soporte Multi-Motor:** Abstracción de diferencias entre SQL Server y Oracle mediante drivers internos que traducen operaciones de backup/restore a sintaxis nativa de cada motor. Sistema mantiene configuraciones específicas por motor (credenciales, parámetros de performance, limitaciones). Interfaz de usuario unificada oculta complejidad de heterogeneidad subyacente.
+**Módulo 6 — Limpieza Automática:**
+- DROP de base sandbox al finalizar validación (o ante falla controlada).
+- Limpieza de archivos temporales si se generaron.
 
-**Módulo de Notificaciones y Alertas:** Capacidad de enviar notificaciones de estado de operaciones mediante email, SMS, o integraciones webhook, generar alertas ante anomalías (fallos de ejecución, degradación de performance, desviaciones de RPO/RTO), escalar alertas críticas a equipos de oncall, y mantener historial de notificaciones para trazabilidad.
-
-**Módulo de Reportes y Dashboards:** Capacidad de generar reportes automáticos ejecutivos con métricas clave de disponibilidad, reportes técnicos detallados para analistas, reportes de cumplimiento normativo para auditores, análisis de tendencias históricas, y exportación de datos en múltiples formatos (PDF, Excel, CSV). Dashboards interactivos proporcionan visualización en tiempo real del estado de infraestructura.
-
-**Módulo de Gestión de Identidades y Acceso:** Integración con sistemas de directorio corporativos (LDAP/Active Directory), asignación de roles y permisos basados en funciones de usuarios, control granular de acceso a operaciones y datos, y cumplimiento de principio de mínimo privilegio. Sistema soporta multi-factor authentication para operaciones críticas.
-
-**Módulo de Recuperación de Datos:** Capacidad de buscar y recuperar datos específicos desde backups sin restaurar completamente base de datos, especificar punto de tiempo deseado para recuperación, validar integridad de datos antes de devolverlos a usuario, y registrar todas las acciones en auditoría. Módulo proporciona interface amigable para usuarios no técnicos.
+**Módulo 7 — Interfaz GUI profesional:**
+- Consola de eventos en tiempo real.
+- Barra de progreso por fase.
+- Indicadores de estado: OK/ERROR/EN PROCESO.
+- Configuración centralizada (servidor, credenciales, rutas, políticas básicas).
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
 ## Restricciones
 
-El sistema operará bajo un conjunto de restricciones técnicas, organizacionales y regulatorias que deben considerarse durante diseño e implementación.
-
-**Restricción Técnica 1 - Compatibilidad de Motores:** El sistema soportará únicamente SQL Server (versiones 2016 y posteriores) y Oracle Database (versiones 11g y posteriores). Otros motores de base de datos no serán soportados en fase inicial del proyecto.
-
-**Restricción Técnica 2 - Requisitos de Almacenamiento:** Espacios de almacenamiento disponibles para backups deben ser dimensionados según volumen máximo de bases de datos a respaldar. Sistema no proporciona compresión de backups pero permitirá integración con herramientas de compresión externas.
-
-**Restricción Técnica 3 - Ancho de Banda de Red:** Operaciones de backup y restauración requieren ancho de banda disponible. Sistema no incluye mecanismos de throttling de red, delegando control a administrators. Operaciones de backup pueden afectar performance de aplicaciones en períodos de alta carga.
-
-**Restricción Técnica 4 - Entorno de Prueba:** Pruebas de restauración requieren servidor dedidado con capacidad suficiente para almacenar copia de datos de test. Ambiente de test debe mantenerse segregado de producción por razones de seguridad.
-
-**Restricción Técnica 5 - Actualización de Software:** Código del sistema será versionado mediante control de fuentes Git, con proceso formal de revisión de cambios antes de despliegue a producción. Cambios críticos de seguridad serán desplegados mediante procedimiento expedito de cambio de emergencia.
-
-**Restricción Organizacional 1 - Gobernanza de Cambios:** Cualquier cambio en políticas de backup o configuración crítica requiere aprobación formal de Change Advisory Board (CAB) corporativo. Cambios no aprobados no serán permitidos en producción.
-
-**Restricción Organizacional 2 - Disponibilidad de Personal:** Implementación y soporte del sistema requiere disponibilidad de 1 FTE de DBA senior y 0.5 FTE de engineero de sistemas durante fase de despliegue (3-4 meses).
-
-**Restricción Organizacional 3 - Integración con Sistemas Existentes:** Sistema debe integrar con infraestructura existente de monitoreo, logging, identidades y notificaciones corporativas. Integración con sistemas legacy puede requerir desarrollo de interfaces customizadas.
-
-**Restricción Regulatoria 1 - Cumplimiento Normativo:** Sistema debe cumplir con requisitos de GDPR, CCPA, y regulaciones locales de protección de datos aplicables. Datos personales contenidos en backups deben ser tratados de acuerdo con políticas de privacidad corporativas.
-
-**Restricción Regulatoria 2 - Retención de Registros de Auditoría:** Registros de auditoría deben ser retenidos mínimo 7 años de acuerdo a requisitos regulatorios empresariales. Sistema debe implementar mecanismos de archivo de auditoría antigua.
-
-**Restricción Regulatoria 3 - Cifrado de Datos:** Datos en tránsito durante operaciones de backup/restore deben ser cifrados utilizando protocolos estándar (TLS 1.2+). Datos en reposo en almacenamiento de backups deben ser cifrados usando algoritmos aprobados (AES-256 mínimo).
+- **Motor soportado:** SQL Server (enfocado en SQL Server 2022 Developer para el entorno del curso).
+- **Sistema operativo recomendado:** Windows (por compatibilidad y tooling SQL Server).
+- **Permisos:** se requiere un usuario con permisos suficientes para `BACKUP DATABASE`, `RESTORE DATABASE` y `DBCC CHECKDB` (idealmente `sysadmin` para simplificar en ámbito académico).
+- **Almacenamiento:** se requiere espacio suficiente para backups y para restauración sandbox.
+- **Rutas y permisos:** la ruta del backup debe ser accesible para el servicio de SQL Server (no solo para el usuario local).
+- **Alcance académico:** funciones enterprise (SIEM, AD, multi-tenant, HA/DR multi-site) se consideran fuera de alcance.
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
-## Rangos de Calidad
+## Rangos de calidad
 
-Los estándares de calidad del sistema están definidos mediante métricas cuantificables que serán evaluadas continuamente durante ciclos de desarrollo y operación.
-
-**Disponibilidad del Sistema:** El sistema debe mantener disponibilidad mínima del 99.5% medida mensualmente. Tiempo de inactividad permitido es máximo 3.6 horas mensuales. Despliegues de actualizaciones y mantenimiento programado deben ser realizados durante ventanas de baja demanda comunicadas con 48 horas de anticipación.
-
-**Confiabilidad de Ejecución de Backups:** Tasa de éxito de ejecución de backups debe ser mínimo 99.8%. Fallos de backup deben ser detectados e notificados automáticamente dentro de 5 minutos de ocurrencia. Sistema implementa reintentos automáticos para fallos transitorios.
-
-**Integridad de Datos:** Todos los backups generados deben pasar validación de integridad mediante checksums criptográficos. Tasa de validación exitosa debe ser 100% de backups completados. Backups que no cumplan validación deben ser registrados y escalados para investigación.
-
-**Tiempo de Recuperación (RTO):** Tiempo máximo de recuperación de datos desde backup debe ser documentado y medido. Para backups full, RTO objetivo es máximo 4 horas. Para backups incremental/diferencial, RTO objetivo es máximo 2 horas adicionales al backup full asociado. RTO real será medido en cada prueba de restauración.
-
-**Punto de Recuperación (RPO):** Pérdida de datos máxima aceptable debe ser definida según políticas de backup. RPO objetivo mínimo es diario (máximo 24 horas de pérdida). Políticas de backup deben ser configuradas para cumplir objetivos de RPO definidos.
-
-**Desempeño de Operaciones:** Ejecución de backup full no debe exceder 2x tamaño de base de datos dividido entre ancho de banda disponible. Ejecución de backup incremental debe completarse en menos de 1 hora. Restauración de backup debe no exceder 1.5x tiempo de backup original.
-
-**Seguridad:** Sistema debe cumplir con estándares de seguridad OWASP Top 10, validación de entrada, protección contra inyección SQL, y encriptación de datos sensibles. Vulnerabilidades críticas deben ser parcheadas dentro de 48 horas.
-
-**Escalabilidad:** Sistema debe soportar crecimiento de 300-400 bases de datos sin degradación significativa de performance. Arquitectura debe permitir escalonamiento horizontal mediante agregación de servidores.
-
-**Mantenibilidad del Código:** Cobertura de pruebas unitarias debe ser mínimo 80%. Documentación de código debe describir propósito y lógica de componentes principales. Código debe seguir estándares de estilo definidos (PEP 8 para Python o C# coding guidelines para C#).
-
-**Facilidad de Uso:** Interfaz de usuario debe ser aprendible para DBAs con 0-3 años de experiencia en máximo 4 horas de capacitación formal. Número de clics requeridos para operaciones comunes debe ser mínimo 3 clics.
+- **Confiabilidad:** un backup solo se considera “exitoso” si también pasa restore test + CHECKDB.
+- **Trazabilidad:** cada ejecución debe generar evidencia (log) completa.
+- **Usabilidad:** la UI debe permitir operar el flujo principal con pasos guiados.
+- **Seguridad:** no persistir contraseñas en texto plano; minimizar exposición de credenciales.
+- **Rendimiento:** tiempos de ejecución medidos y mostrados para estimar RTO real.
+- **Mantenibilidad:** código desacoplado por capas (Clean Architecture) y con estándares (PEP 8).
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
 ## Precedencia y Prioridad
 
-Las características del sistema están priorizadas según impacto en objetivos de negocio y orden de implementación recomendado.
+**Prioridad 1 — Crítica (Fase 1):**
+- Conexión a SQL Server vía `pyodbc`.
+- Verificación de permisos (sysadmin).
+- Backup FULL con nomenclatura automática.
+- Logging básico y UI mínima.
 
-**Prioridad 1 - Crítica (Fase 1 - Semanas 1-8):**
+**Prioridad 2 — Alta (Fase 2):**
+- Restore test en sandbox (FILELISTONLY + WITH MOVE).
+- DBCC CHECKDB.
+- Limpieza automática (DROP sandbox).
+- UI con progreso y consola.
 
-Estas características deben ser implementadas en fase inicial del proyecto y son prerrequisito para todas las fases posteriores:
+**Prioridad 3 — Media (Fase 3):**
+- Validaciones comparativas configurables (conteos/tablas críticas).
+- Reportes/Historial de ejecuciones.
+- Políticas de retención y alertas de espacio (si el tiempo lo permite).
 
-- Módulo de Gestión de Políticas de Backup: definición y almacenamiento de políticas, validación de parámetros.
-- Módulo de Orquestación de Ejecución: programación de backups, integración con SQL Server y Oracle, registro de ejecuciones.
-- Módulo de Auditoría: logging de operaciones en base de datos centralizada, protección contra modificación.
-- Módulo de Identidades: autenticación de usuarios, asignación básica de roles.
-- Interfaz de Administración Básica: pantalla de configuración de políticas, visualización de ejecuciones recientes.
-
-**Prioridad 2 - Alta (Fase 2 - Semanas 9-14):**
-
-Características que agregan valor significativo y deben implementarse inmediatamente después de fase 1:
-
-- Módulo de Validación de Integridad: checksums criptográficos, detección de backups corruptos.
-- Módulo de Pruebas de Restauración: restauración en ambientes aislados, validación de datos restaurados.
-- Módulo de Notificaciones: alertas por email, integración con sistemas de notificación corporativos.
-- Módulo de Reportes Básicos: reporte de ejecuciones, métricas de éxito/fallo.
-- Integración LDAP/Active Directory: autenticación contra directorio corporativo.
-
-**Prioridad 3 - Media (Fase 3 - Semanas 15-22):**
-
-Características que mejoran usabilidad y proporcionar visibilidad avanzada:
-
-- Módulo de Dashboards Interactivos: visualización en tiempo real de estado, gráficos de tendencias.
-- Módulo de Recuperación de Datos Específicos: búsqueda y recuperación selectiva de objetos.
-- Reportes Avanzados: reportes de conformidad, análisis de tendencias históricas.
-- Alertas Avanzadas: escalación de alertas, integración con sistemas de oncall.
-- Métricas de RPO/RTO: cálculo y seguimiento de objetivos de recuperación.
-
-**Prioridad 4 - Baja (Fase 4+ - Semanas 23+):**
-
-Características de valor adicional que pueden implementarse en fases posteriores:
-
-- Machine Learning para predicción de fallos de backup basada en histórico.
-- Integración con plataformas cloud (AWS, Azure, GCP) para almacenamiento de backups.
-- Compresión y deduplicación de backups.
-- Replicación geográfica de backups para disaster recovery regional.
-- Portal de autoservicio para usuarios finales de recuperación de datos.
+**Prioridad 4 — Baja (Futuro):**
+- Diferenciales/log backups.
+- Integraciones avanzadas y reportes enterprise.
+- Exportación avanzada y dashboard histórico.
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
@@ -409,146 +409,59 @@ Características de valor adicional que pueden implementarse en fases posteriore
 
 ### Estándares Legales
 
-La plataforma debe cumplir con marco regulatorio extenso de protección de datos, privacidad y seguridad información aplicable a operaciones de datos corporativos.
-
-**GDPR (Reglamento General de Protección de Datos):** El sistema debe implementar mecanismos que permitan cumplimiento con GDPR incluyendo: derechos de acceso de sujetos de datos a sus datos personales contenidos en backups, derechos de eliminación (right to be forgotten) que requieren verificación de que datos fueron eliminados de todos los backups existentes, derecho de rectificación de datos inexactos, y auditoría de acceso a datos personales. Sistema debe mantener registros de consentimiento y bases legales para procesamiento de datos.
-
-**CCPA (California Consumer Privacy Act):** Requisitos similares a GDPR para residentes de California incluyendo transparencia en recolección de datos personales, derechos de acceso, eliminación y opt-out. Sistema debe facilitar cumplimiento con notificación de brechas de seguridad dentro de 72 horas si ocurriese.
-
-**Regulaciones Locales:** En jurisdicción de Perú, sistema debe cumplir con Ley de Protección de Datos Personales (Ley 29733) que requiere consentimiento expreso para procesamiento de datos personales, derecho de acceso e impugnación, notificación de brechas a APDP (Autoridad Protectora de Datos Personales), y retención limitada de datos.
-
-**Requisitos de Auditoría:** Auditoría interna y reguladores externos pueden requerir demostración de cumplimiento. Sistema debe generar reportes de conformidad demostrando que políticas de backup se alineran con requisitos regulatorios, que datos personales se tratan con las protecciones requeridas, y que existe capacidad comprobada de recuperación ante desastres.
+En el contexto peruano, el sistema se alinea a la **Ley N.° 29733** (Protección de Datos Personales), especialmente en lo referente a confidencialidad y control de acceso a respaldos que puedan contener datos personales. Para fines académicos, se recomienda utilizar datos de prueba o anonimizar información al presentar demostraciones.
 
 ### Estándares de Comunicación
 
-La plataforma debe implementar protocolos de comunicación seguros y confiables para todas las interacciones entre componentes y con sistemas externos.
-
-**Seguridad de Transportes:** Todas las comunicaciones sobre red entre cliente y servidor deben utilizar TLS 1.2 o superior con certificados X.509 válidos. Servidor debe rechazar conexiones no encriptadas. Certificados deben ser emitidos por autoridades certificadoras confiables o auto-signed para ambientes de prueba. Validación de certificados debe implementarse en lado de cliente.
-
-**Autenticación de Servicios:** Autenticación entre componentes de la plataforma debe implementar tokens JWT o OAuth 2.0. Credenciales de servicios deben ser almacenadas cifradas en vault de secrets dedicado (HashiCorp Vault o similar). Rotación periódica de credenciales (mínimo trimestral) debe ser automatizada.
-
-**APIs de Integración:** Interfaces de programación para integraciones con sistemas externos deben implementar autenticación mediante claves API con scope limitado. Rate limiting debe implementarse para prevenir abuso. Documentación completa de APIs debe estar disponible para integradores externos.
-
-**Notificaciones:** Canales de notificación (email, SMS, webhooks) deben implementar validación de destinatarios y confirmación de entrega. Payloads de notificaciones deben incluir información mínima necesaria sin exponer datos sensibles. Logs de notificaciones deben registrarse en auditoría centralizada.
-
-### Estándares de Cumplimiento de Plataforma
-
-La plataforma debe demostrar conformidad con estándares de gobernanza, calidad de software y prácticas de ingeniería reconocidas.
-
-**ISO/IEC 27001 (Seguridad de Información):** Sistema debe implementar controles de seguridad definidos en ISO 27001 incluyendo: control de acceso basado en roles, encriptación de datos sensibles, auditoría de acceso, gestión de vulnerabilidades, planes de respuesta ante incidentes, y revisiones periódicas de seguridad. Cada control debe ser documentado y demostrable.
-
-**NIST Cybersecurity Framework:** Sistema debe alinearse con categorías de NIST: Identificar (inventario de activos y riesgos), Proteger (mecanismos de defensa), Detectar (capacidad de detección de anomalías), Responder (planes de incidente), y Recuperar (capacidad de recuperación). Evaluación de madurez debe realizarse anualmente.
-
-**IEEE 830 (Especificación de Requisitos de Software):** Este documento de visión junto con especificaciones de requisitos posteriores debe seguir estructura y estándares de IEEE 830 para claridad, completitud y no ambigüedad.
-
-**Six Sigma/CMMI:** Procesos de desarrollo deben implementar prácticas de mejora continua. Defectos reportados deben ser categorizados, trazados a resolución, y analizados para identificar patrones de mejora.
+- Comunicación con SQL Server a través de `pyodbc` (ODBC/TDS).
+- Recomendación: uso de cifrado en tránsito si la instancia lo soporta (TLS), según configuración de SQL Server y driver.
 
 ### Estándares de Calidad y Seguridad
 
-La plataforma debe implementar prácticas rigorosas de aseguramiento de calidad y seguridad a lo largo de ciclo de vida de desarrollo.
-
-**Testing:** Suite de pruebas automatizadas debe cubrir mínimo 80% de código mediante pruebas unitarias. Pruebas de integración deben validar interacciones entre componentes. Pruebas de aceptación deben validar cumplimiento de requisitos de negocio. Pruebas de carga deben validar que sistema soporta volumen esperado. Pruebas de seguridad (SAST, DAST) deben ser ejecutadas en cada build.
-
-**Gestión de Vulnerabilidades:** Código debe ser escaneado periódicamente para vulnerabilidades utilizando herramientas de SAST (SonarQube, Checkmarx). Dependencias externas deben ser escaneadas para vulnerabilidades conocidas (OWASP Dependency Check, Snyk). Vulnerabilidades identificadas deben ser priorizadas y parcheadas según criticidad.
-
-**Despliegue Seguro:** Artefactos de compilación deben ser firmados digitalmente. Despliegues a producción deben requerir aprobación de múltiples revisores. Rollback automático debe estar disponible si despliegue falla validaciones post-deploy.
-
-**Mantenibilidad:** Código debe ser documentado inline explicando lógica compleja. Modelos de datos deben ser documentados con diagramas ERD. APIs debe tener documentación OpenAPI/Swagger. Guías operacionales debe cubrir procedimientos comunes de troubleshooting.
-
-**Monitoreo de Seguridad:** Sistema debe ser monitoreado para detección de actividades anómalas mediante análisis de logs y métricas. Alertas de seguridad debe ser revisadas diariamente. Revisiones de seguridad periódicas (trimestral) deben verificar cumplimiento de controles.
+- Validación de entradas (nombre de BD, rutas, parámetros).
+- Protección contra SQL Injection mediante parámetros y evitando concatenación insegura.
+- Logs sin exponer contraseñas.
+- Manejo de errores robusto: capturar y reportar excepciones sin detener la app sin control.
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
 ## CONCLUSIONES
 
-La Plataforma Automatizada de Generación de Backups y Validación de Restauración representa una inversión estratégica crítica en infraestructura de continuidad del negocio y resiliencia de datos corporativos. A través de análisis exhaustivo de necesidades de interesados, requisitos técnicos y restricciones operacionales, se ha definido solución comprehensiva que integra automatización inteligente, validación proactiva y auditoría integral.
+SQL-SafeBridge propone una solución práctica y alineada con necesidades reales de continuidad de datos en SQL Server: no solo automatiza backups, sino que valida su recuperabilidad mediante restore test y `DBCC CHECKDB`, generando evidencia técnica verificable.
 
-El proyecto aborda vulnerabilidades significativas en prácticas actuales de respaldo de datos mediante eliminación de intervención manual en operaciones repetitivas, introducción de validación continua de viabilidad de recuperación, y provisión de trazabilidad completa para cumplimiento regulatorio. La arquitectura propuesta, construida sobre tecnologías modernas y principios de ingeniería de software robustos, proporciona plataforma escalable, mantenible y segura que evolucionará con requisitos organizacionales cambiantes.
+El proyecto mejora significativamente la confiabilidad operativa al transformar procesos manuales en un flujo orquestado, repetible y auditable, incrementando la confianza en los respaldos y permitiendo medir métricas reales para RTO/RPO.
 
-Implementación exitosa de esta plataforma generará beneficios mensurables: reducción del 20-30% en costos operativos de personal especializado, eliminación de vulnerabilidad crítica de falta de validación de recuperación, cumplimiento proactivo de regulaciones de protección de datos, y mejora significativa en confianza de stakeholders sobre continuidad del negocio. La capacidad de medir y reportar sobre RPO/RTO reales proporciona visibilidad sin precedentes sobre postura de resiliencia organizacional.
-
-El equipo responsable del proyecto (Iker Alberto Sierra Ruiz e Julio Samuel Cortez Mamani) asume compromiso de entregar solución de calidad excepcional que exceda expectativas de usuarios y stakeholders, implementando todas las características y estándares definidos en este documento de visión. Los principios de ingeniería de software, seguridad y auditoría establecidos aquí guiarán todas las decisiones técnicas durante fases posteriores del ciclo de vida del desarrollo.
+El equipo responsable del proyecto (**Iker Alberto Sierra Ruiz** y **Julio Samuel Cortez Mamani**) asume el compromiso de implementar el sistema con enfoque de ingeniería de software, priorizando calidad, seguridad y mantenibilidad mediante Clean Architecture y documentación adecuada.
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
 ## RECOMENDACIONES
 
-Basado en análisis de requisitos y contexto de implementación, se presentan las siguientes recomendaciones estratégicas:
-
-**Recomendación 1 - Establecimiento de Sponsor Ejecutivo:** Se recomienda designar explícitamente un sponsor ejecutivo (Directivo de TI) que proporcione visibilidad estratégica, autoridad de decisión en escalaciones, y apoyo presupuestario continuado. Sponsor debe participar en gates de revisión de fase para asegurar alineación con objetivos corporativos.
-
-**Recomendación 2 - Capacitación Temprana de Usuarios:** Se recomienda iniciar programa de capacitación de administradores de bases de datos en paralelo con desarrollo, utilizando versiones beta de la plataforma. Capacitación temprana genera adopción más rápida y feedback valioso para refinamiento de interfaz.
-
-**Recomendación 3 - Piloto Controlado:** Se recomienda implementar piloto inicial con subconjunto de bases de datos no críticas (2-5 bases de datos) antes de despliegue a producción completo. Piloto permite validación de supuestos técnicos y operacionales en ambiente controlado.
-
-**Recomendación 4 - Documentación Completa:** Se recomienda priorizar documentación técnica y operacional desde fase inicial, manteniéndola sincronizada con desarrollo. Documentación completa reduce curva de aprendizaje y facilita transferencia de conocimiento.
-
-**Recomendación 5 - Integración con Monitoreo Corporativo:** Se recomienda realizar early integration con plataformas de monitoreo corporativas existentes (Prometheus, Grafana, ELK Stack) para asegurar visibilidad desde sistemas de operaciones existentes. Integración temprana evita refactoring posterior.
-
-**Recomendación 6 - Evaluación de Seguridad Tercerista:** Se recomienda realizar evaluación de seguridad por terceros independientes (penetration testing, code review de seguridad) antes de despliegue a producción. Evaluación externa proporciona validación objetiva de postura de seguridad.
-
-**Recomendación 7 - Plan de Mejora Continua:** Se recomienda establecer proceso formal de mejora continua con retrospectivas mensuales, análisis de defectos, y roadmap priorizado de enhancements. Mejora continua asegura que plataforma evoluciona con requisitos cambiantes.
-
-**Recomendación 8 - Establecimiento de SLA:** Se recomienda establecer acuerdos de nivel de servicio (SLA) explícitos con departamentos consumidores de backups definiendo disponibilidad esperada, tiempos de respuesta a incidentes, y ventanas de mantenimiento. SLAs crean expectativas claras y accountability.
+- Ejecutar piloto con una base de datos de prueba antes de aplicar a entornos reales.
+- Definir rutas y permisos de servicio SQL Server para evitar fallos típicos de backup/restore.
+- Establecer una política mínima de retención y limpieza para evitar saturación de almacenamiento.
+- Mantener evidencias por ejecución (logs) y revisarlas periódicamente.
+- Incorporar pruebas automatizadas para los casos de uso principales (al menos pruebas de integración del flujo).
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
 ## BIBLIOGRAFIA
 
 - IEEE. (1998). IEEE Std 830-1998: Recommended Practice for Software Requirements Specifications. Institute of Electrical and Electronics Engineers.
-
 - Sommerville, I. (2015). Software Engineering (10th ed.). Pearson Education.
-
-- NIST. (2018). Framework for Improving Critical Infrastructure Cybersecurity, Version 1.1. National Institute of Standards and Technology.
-
 - ISO/IEC. (2022). ISO/IEC 27001:2022 – Information security management systems. International Organization for Standardization.
-
-- Microsoft Corporation. (2024). SQL Server Backup and Restore Documentation. Retrieved from https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/back-up-and-restore-of-sql-server-databases
-
 - Mullins, C. S. (2012). Database Administration: The Complete Guide to Practices and Procedures (2nd ed.). Addison-Wesley Professional.
-
-- Oracle Corporation. (2024). Oracle Database Backup and Recovery User's Guide. Retrieved from https://docs.oracle.com/en/database/oracle/oracle-database/
-
-- Parker, R., & Barkacs, L. L. (2004). Disaster Recovery Planning: Preparing for the Unthinkable (4th ed.). Pearson Education.
-
-- Skripkin, Y., Poremba, M., & Siozios, K. (2019). Backup and Recovery Strategies in Modern Data Centers. Journal of Information Security and Cybersecurity, 45(3), 234-251.
 
 <div style="page-break-after: always; visibility: hidden">\pagebreak</div>
 
 ## WEBGRAFIA
 
 - Microsoft SQL Server Official Documentation: https://learn.microsoft.com/en-us/sql/
-
-- Oracle Database Official Documentation: https://docs.oracle.com/en/database/
-
-- OWASP Top 10 Web Application Security Risks: https://owasp.org/www-project-top-ten/
-
-- NIST Cybersecurity Framework: https://www.nist.gov/cyberframework
-
-- ISO/IEC 27001 Information Security Standards: https://www.iso.org/isoiec-27001-information-security-management.html
-
+- Microsoft SQL Server Backup/Restore: https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/
+- Microsoft DBCC CHECKDB: https://learn.microsoft.com/en-us/sql/t-sql/database-console-commands/dbcc-checkdb-transact-sql
+- Python Official Documentation: https://docs.python.org/
+- pyodbc Documentation: https://github.com/mkleehammer/pyodbc
+- customtkinter Documentation: https://github.com/TomSchimansky/CustomTkinter
 - GitHub: https://github.com
 
-- Python Official Documentation: https://docs.python.org/
-
-- C# Programming Guide: https://docs.microsoft.com/en-us/dotnet/csharp/
-
-- Docker Official Documentation: https://docs.docker.com/
-
-- HashiCorp Vault - Secrets Management: https://www.vaultproject.io/
-
-- SonarQube Code Quality and Security: https://www.sonarqube.org/
-
-- GDPR Official Regulation Text: https://gdpr-info.eu/
-
-- CCPA - California Consumer Privacy Act: https://oag.ca.gov/privacy/ccpa
-
-- Ley de Protección de Datos Personales Perú: https://www.mimp.gob.pe/
-
-- APDP - Autoridad Protectora de Datos Personales Perú: https://www.apdp.gob.pe/
-
-- Prometheus Monitoring System: https://prometheus.io/
-
-- Grafana Data Visualization: https://grafana.com/
-
-- ELK Stack Documentation: https://www.elastic.co/what-is/elk-stack
+````
