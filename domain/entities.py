@@ -21,22 +21,24 @@ class OperationStatus(Enum):
 class ConnectionConfig:
     """Configuración de conexión a SQL Server."""
     server: str
-    username: str
-    password: str
+    username: str = ""
+    password: str = ""
     database: str = "master"
     driver: str = "ODBC Driver 18 for SQL Server"
     trust_certificate: bool = True
+    use_windows_auth: bool = False
 
     def build_connection_string(self) -> str:
-        """Construye el connection string dinámicamente."""
-        return (
+        """Construye el connection string dinámicamente según el modo de autenticación."""
+        base = (
             f"DRIVER={{{self.driver}}};"
             f"SERVER={self.server};"
             f"DATABASE={self.database};"
-            f"UID={self.username};"
-            f"PWD={self.password};"
             f"TrustServerCertificate={'yes' if self.trust_certificate else 'no'};"
         )
+        if self.use_windows_auth:
+            return base + "Trusted_Connection=yes;"
+        return base + f"UID={self.username};PWD={self.password};"
 
 
 @dataclass

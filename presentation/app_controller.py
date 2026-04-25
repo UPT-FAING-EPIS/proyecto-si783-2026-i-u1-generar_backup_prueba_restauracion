@@ -22,6 +22,7 @@ from shared.config import (
     COLOR_ERROR,
     COLOR_INFO,
     COLOR_SUCCESS,
+    COLOR_WARNING,
     UI_COLOR_SCHEME,
     UI_THEME,
 )
@@ -32,6 +33,10 @@ class AppController(ctk.CTk):
     """
     Ventana raíz de la aplicación.
     Maneja la navegación entre LoginScreen y DashboardScreen.
+
+    Al iniciarse intenta una conexión automática con Autenticación Windows;
+    si tiene éxito pasa directamente al dashboard, de lo contrario muestra
+    la pantalla de login con el formulario completo.
     """
 
     def __init__(self) -> None:
@@ -52,6 +57,73 @@ class AppController(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
 
         self._show_login()
+        # Intentar conexión automática en segundo plano
+        threading.Thread(target=self._try_auto_connect, daemon=True).start()
+
+    # ------------------------------------------------------------------
+    # Conexión automática
+    # ------------------------------------------------------------------
+
+    def _try_auto_connect(self) -> None:
+        """
+        Ejecuta en segundo plano: intenta conectarse con Autenticación Windows
+        usando los servidores candidatos del equipo local.
+        Siempre pasa la lista de candidatos al login para que el usuario
+        pueda elegir entre ellos si la conexión automática falla.
+        """
+        self.after(
+            0,
+            lambda: self._update_login_status(
+                "🔍 Detectando servidor SQL Server automáticamente…",
+                "gray",
+            ),
+        )
+
+        # Obtener candidatos y pasarlos al login como sugerencias de inmediato
+        candidates = SqlServerRepository.discover_servers()
+        self.after(0, lambda: self._update_server_suggestions(candidates))
+
+        config = SqlServerRepository.try_auto_connect()
+        if config is None:
+            self.after(
+                0,
+                lambda: self._update_login_status(
+                    "⚠️ No se detectó SQL Server automáticamente. "
+                    "Selecciona una opción del desplegable o escribe el servidor manualmente.",
+                    COLOR_WARNING,
+                ),
+            )
+            return
+
+        # Obtener bases de datos y ruta de backup
+        try:
+            databases = self._repository.list_databases(config)
+            default_path = self._repository.get_default_backup_path(config)
+        except Exception:
+            databases = []
+            default_path = ""
+
+        self._config = config
+        self.after(
+            0,
+            lambda: self._show_main(
+                config.server, "Windows Auth", databases, default_path
+            ),
+        )
+
+    def _update_login_status(self, message: str, color: str) -> None:
+        """Actualiza el banner de estado en la pantalla de login (si está visible)."""
+        for widget in self.winfo_children():
+            if isinstance(widget, LoginScreen):
+                widget.show_auto_connect_status(message, color)
+                break
+
+    def _update_server_suggestions(self, servers: list) -> None:
+        """Pasa la lista de servidores detectados al combobox del login."""
+        for widget in self.winfo_children():
+            if isinstance(widget, LoginScreen):
+                widget.set_server_suggestions(servers)
+                break
 
     # ------------------------------------------------------------------
     # Navegación
@@ -95,23 +167,43 @@ class AppController(ctk.CTk):
     # Handlers
     # ------------------------------------------------------------------
 
-    def _handle_login(self, server: str, username: str, password: str) -> None:
+    def _handle_login(
+        self,
+        server: str,
+        username: str,
+        password: str,
+        use_windows_auth: bool,
+    ) -> None:
         """Valida credenciales y navega al dashboard."""
         config = ConnectionConfig(
             server=server,
             username=username,
             password=password,
+            use_windows_auth=use_windows_auth,
         )
 
         def _do_connect() -> None:
             ok = self._repository.test_connection(config)
             if not ok:
-                self.after(
-                    0,
-                    lambda: self._on_login_failed(
-                        "No se pudo conectar al servidor.\n\nVerifica:\n• El nombre del servidor\n• Las credenciales"
-                    ),
-                )
+                if use_windows_auth:
+                    hint = (
+                        f"No se pudo conectar al servidor '{server}' usando "
+                        "Autenticación Windows.\n\n"
+                        "Posibles causas:\n"
+                        "• El nombre del servidor o instancia es incorrecto\n"
+                        "  (usa el desplegable para ver las opciones detectadas)\n"
+                        "• SQL Server no está iniciado\n"
+                        "• La cuenta de Windows no tiene acceso a SQL Server"
+                    )
+                else:
+                    hint = (
+                        f"No se pudo conectar al servidor '{server}'.\n\n"
+                        "Posibles causas:\n"
+                        "• El nombre del servidor o instancia es incorrecto\n"
+                        "• El usuario o la contraseña son incorrectos\n"
+                        "• La autenticación SQL Server no está habilitada"
+                    )
+                self.after(0, lambda: self._on_login_failed(hint))
                 return
 
             has_perm = self._repository.validate_permissions(config)
@@ -119,7 +211,8 @@ class AppController(ctk.CTk):
                 self.after(
                     0,
                     lambda: self._on_login_failed(
-                        "Permisos insuficientes.\n\nEl usuario necesita rol sysadmin."
+                        "Permisos insuficientes.\n\n"
+                        "El usuario necesita rol sysadmin en SQL Server."
                     ),
                 )
                 return
@@ -127,9 +220,10 @@ class AppController(ctk.CTk):
             databases = self._repository.list_databases(config)
             default_path = self._repository.get_default_backup_path(config)
             self._config = config
+            display_user = "Windows Auth" if use_windows_auth else username
             self.after(
                 0,
-                lambda: self._show_main(server, username, databases, default_path),
+                lambda: self._show_main(server, display_user, databases, default_path),
             )
 
         threading.Thread(target=_do_connect, daemon=True).start()
@@ -255,7 +349,7 @@ class AppController(ctk.CTk):
             )
         else:
             self._dashboard.operation_finished(
-                success=False, message=f"❌ Error al restaurar"
+                success=False, message="❌ Error al restaurar"
             )
             show_error(
                 self,
@@ -268,5 +362,6 @@ class AppController(ctk.CTk):
     # ------------------------------------------------------------------
 
     def _ui_log_callback(self, level: str, message: str) -> None:
-        """Recibe logs desde el logger."""
-        pass
+        """Recibe logs desde el logger y los reenvía al panel de actividad."""
+        if hasattr(self, "_dashboard"):
+            self.after(0, lambda: self._dashboard.append_log(level, message))

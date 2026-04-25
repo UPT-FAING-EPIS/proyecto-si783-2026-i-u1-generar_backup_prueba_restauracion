@@ -4,9 +4,11 @@ Implementación concreta del repositorio SQL Server usando pyodbc.
 """
 import os
 import re
+import socket
+import threading
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import pyodbc
 
@@ -20,6 +22,26 @@ from domain.entities import (
 )
 from domain.interfaces import IDatabaseRepository
 
+# Controladores ODBC en orden de preferencia
+ODBC_DRIVER_CANDIDATES: List[str] = [
+    "ODBC Driver 18 for SQL Server",
+    "ODBC Driver 17 for SQL Server",
+    "SQL Server",
+]
+
+# Timeout (segundos) usado exclusivamente para sondear la disponibilidad
+# de un servidor.  Debe ser corto para evitar bloqueos en la UI.
+_PROBE_TIMEOUT: int = 3
+
+# SQLSTATE codes y fragmentos de mensaje que indican "driver no instalado".
+# Se usan para diferenciar errores de driver de errores de red/autenticación.
+_DRIVER_NOT_FOUND_INDICATORS: List[str] = [
+    "im002",   # SQLSTATE: Data source name not found
+    "im003",   # SQLSTATE: Specified driver could not be loaded
+    "data source name not found",
+    "driver not found",
+]
+
 
 class SqlServerRepository(IDatabaseRepository):
     """
@@ -29,17 +51,201 @@ class SqlServerRepository(IDatabaseRepository):
     """
 
     # ------------------------------------------------------------------
+    # Descubrimiento automático de servidores
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def get_available_driver() -> str:
+        """
+        Devuelve el primer controlador ODBC de SQL Server disponible en
+        el sistema.  Si no encuentra ninguno de los conocidos, devuelve
+        el primero de la lista como valor por defecto.
+        """
+        installed = [d.lower() for d in pyodbc.drivers()]
+        for driver in ODBC_DRIVER_CANDIDATES:
+            if driver.lower() in installed:
+                return driver
+        # Buscar cualquier driver que contenga "sql server"
+        for d in pyodbc.drivers():
+            if "sql server" in d.lower():
+                return d
+        return ODBC_DRIVER_CANDIDATES[0]
+
+    @staticmethod
+    def _detect_instances_from_registry() -> List[str]:
+        """
+        Lee el registro de Windows para obtener las instancias de SQL Server
+        instaladas localmente.  Devuelve una lista con los nombres de instancia
+        (p. ej. ``['MSSQLSERVER', 'SQLEXPRESS']``).
+        Si no se puede leer el registro (sistema no Windows u otro error)
+        devuelve una lista vacía.
+        """
+        instances: List[str] = []
+        try:
+            import winreg  # Sólo disponible en Windows
+
+            key_path = r"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL"
+            access_flags = [
+                winreg.KEY_READ | winreg.KEY_WOW64_64KEY,  # type: ignore[attr-defined]
+                winreg.KEY_READ,  # type: ignore[attr-defined]
+            ]
+            for flags in access_flags:
+                try:
+                    with winreg.OpenKey(  # type: ignore[attr-defined]
+                        winreg.HKEY_LOCAL_MACHINE, key_path, 0, flags  # type: ignore[attr-defined]
+                    ) as key:
+                        i = 0
+                        while True:
+                            try:
+                                name, _, _ = winreg.EnumValue(key, i)  # type: ignore[attr-defined]
+                                instances.append(name)
+                                i += 1
+                            except OSError:
+                                break
+                    if instances:
+                        break
+                except OSError:
+                    continue
+        except Exception:
+            pass
+        return instances
+
+    @staticmethod
+    def discover_servers() -> List[str]:
+        """
+        Genera una lista ordenada de candidatos de servidor basada en el
+        nombre del equipo local.
+
+        Orden de prioridad:
+        1. Instancia por defecto (``HOSTNAME``) — más habitual en Enterprise.
+        2. ``HOSTNAME\\SQLEXPRESS`` — habitual en Express.
+        3. Otras instancias detectadas desde el registro de Windows.
+        4. Variantes ``localhost`` como último recurso.
+        """
+        hostname = socket.gethostname()
+        seen: Dict[str, None] = {}  # dict ordenado como conjunto
+
+        def _add(server: str) -> None:
+            seen[server] = None
+
+        # Primero las instancias detectadas en el registro (respetan orden real)
+        registry_instances = SqlServerRepository._detect_instances_from_registry()
+        for inst in registry_instances:
+            if inst.upper() == "MSSQLSERVER":
+                _add(hostname)          # instancia por defecto
+            else:
+                _add(rf"{hostname}\{inst}")
+
+        # Añadir candidatos conocidos si aún no están
+        for candidate in [
+            hostname,
+            rf"{hostname}\SQLEXPRESS",
+            rf"{hostname}\MSSQLSERVER",
+            r"localhost\SQLEXPRESS",
+            "localhost",
+            "(local)",
+        ]:
+            _add(candidate)
+
+        return list(seen.keys())
+
+    @classmethod
+    def try_auto_connect(cls) -> Optional[ConnectionConfig]:
+        """
+        Intenta conectarse automáticamente con Autenticación Windows usando
+        la lista de candidatos devuelta por ``discover_servers``.
+
+        Todos los candidatos se sondean **en paralelo** con un timeout corto
+        (``_PROBE_TIMEOUT`` segundos) para no bloquear la interfaz.  Se devuelve
+        la configuración del candidato con mayor prioridad (índice más bajo) que
+        haya respondido correctamente.
+
+        Returns:
+            ``ConnectionConfig`` si alguna conexión tuvo éxito; ``None`` si no.
+        """
+        candidates = cls.discover_servers()
+        driver = cls.get_available_driver()
+        results: Dict[int, ConnectionConfig] = {}
+        lock = threading.Lock()
+
+        def _probe(idx: int, server: str) -> None:
+            config = ConnectionConfig(
+                server=server,
+                use_windows_auth=True,
+                driver=driver,
+            )
+            try:
+                conn = pyodbc.connect(
+                    config.build_connection_string(),
+                    autocommit=True,
+                    timeout=_PROBE_TIMEOUT,
+                )
+                conn.cursor().execute("SELECT 1")
+                conn.close()
+                with lock:
+                    results[idx] = config
+            except Exception:
+                pass
+
+        threads = [
+            threading.Thread(target=_probe, args=(i, srv), daemon=True)
+            for i, srv in enumerate(candidates)
+        ]
+        for t in threads:
+            t.start()
+        # Esperar a que todos los hilos terminen (o a que transcurra el margen)
+        join_timeout = _PROBE_TIMEOUT + 1
+        for t in threads:
+            t.join(timeout=join_timeout)
+
+        if results:
+            best_idx = min(results.keys())
+            return results[best_idx]
+        return None
+
+    # ------------------------------------------------------------------
     # Conexión / Utilidades internas
     # ------------------------------------------------------------------
 
     def _connect(self, config: ConnectionConfig) -> pyodbc.Connection:
-        """Abre una conexión y la retorna."""
-        conn = pyodbc.connect(
-            config.build_connection_string(),
-            autocommit=True,
-            timeout=30,
-        )
-        return conn
+        """
+        Abre una conexión y la retorna.
+
+        Si el driver configurado en ``config`` no está disponible, intenta
+        automáticamente los controladores de ``ODBC_DRIVER_CANDIDATES``.
+        """
+        last_exc: Optional[Exception] = None
+
+        # Intentar primero con el driver del config; luego con los alternativos
+        drivers_to_try = [config.driver] + [
+            d for d in ODBC_DRIVER_CANDIDATES if d != config.driver
+        ]
+        for driver in drivers_to_try:
+            try:
+                conn_str = (
+                    f"DRIVER={{{driver}}};"
+                    f"SERVER={config.server};"
+                    f"DATABASE={config.database};"
+                    f"TrustServerCertificate={'yes' if config.trust_certificate else 'no'};"
+                )
+                if config.use_windows_auth:
+                    conn_str += "Trusted_Connection=yes;"
+                else:
+                    conn_str += f"UID={config.username};PWD={config.password};"
+
+                conn = pyodbc.connect(conn_str, autocommit=True, timeout=30)
+                return conn
+            except pyodbc.Error as exc:
+                last_exc = exc
+                err_msg = str(exc).lower()
+                # Si el error es del driver (no encontrado), probar el siguiente
+                if any(ind in err_msg for ind in _DRIVER_NOT_FOUND_INDICATORS):
+                    continue
+                # Cualquier otro error (host no alcanzable, autenticación…) se
+                # propaga inmediatamente para no enmascararlo.
+                raise
+
+        raise last_exc or pyodbc.Error("No se encontró un controlador ODBC compatible.")
 
     def _execute_scalar(self, config: ConnectionConfig, query: str) -> any:
         """Ejecuta una consulta y retorna el primer campo del primer resultado."""
@@ -88,13 +294,15 @@ class SqlServerRepository(IDatabaseRepository):
             return [row.name for row in cursor.fetchall()]
 
     def database_exists(self, config: ConnectionConfig, database_name: str) -> bool:
-        """Verifica si una base de datos existe en el servidor."""
+        """Verifica si una base de datos existe en el servidor (consulta parametrizada)."""
         try:
-            result = self._execute_scalar(
-                config, 
-                f"SELECT 1 FROM sys.databases WHERE name = N'{database_name}'"
-            )
-            return result == 1
+            with self._connect(config) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT 1 FROM sys.databases WHERE name = ?",
+                    (database_name,),
+                )
+                return cursor.fetchone() is not None
         except pyodbc.Error:
             return False
 
