@@ -1,11 +1,20 @@
-name: Security Scan (Semgrep)
-on: [push, pull_request]
+name: Seguridad y Calidad
+on: [push]
+
 jobs:
-  semgrep:
+  analisis:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Semgrep OSS Scan
-        run: |
-          pip install semgrep
-          semgrep scan --config auto --error
+
+      # Esto cumple con Semgrep
+      - name: Ejecutar Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: "p/default"
+
+      # Esto cumple con Snyk (necesitas crear cuenta en snyk.io y poner el TOKEN en settings del repo)
+      - name: Ejecutar Snyk
+        uses: snyk/actions/python@master 
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
