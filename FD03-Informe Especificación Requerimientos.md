@@ -8,38 +8,38 @@
 
 **Escuela Profesional de Ingeniería de Sistemas**
 
-**Proyecto: SQL-SafeBridge: Orquestador de Respaldos y Validación de Integridad (SQL Server)**
+**Proyecto: *SafeBridge: Orquestador Multi-Motor de Respaldos y Validación de Integridad***
 
-Curso: Base de Datos II
+Curso: *Base de Datos II*
 
-Docente: Mag. Patrick Cuadros Quiroga
+Docente: *Ing. Patrick José Cuadros Quiroga*
 
 Integrantes:
 
-**Iker Alberto Sierra Ruiz (2023077090)**
+***Sierra Ruiz, Iker Alberto (2023077090)***
 
-**Julio Samuel Cortez Mamani (2023077283)**
+***Cortez Mamani, Julio Samuel (2023077283)***
+
+**Empresa / Equipo: BitCraft Solutions**
 
 **Tacna – Perú**
 
-**2026**
+***2026***
 
 </center>
 
 <div style="page-break-after: always; visibility: hidden"></div>
 
+**Sistema: *SafeBridge: Orquestador Multi-Motor de Respaldos y Validación de Integridad***
+
+**Informe FD03 — Historias de Usuario, Criterios de Aceptación y Diagramas de Secuencia**
+
+**Versión *1.0***
+
 | CONTROL DE VERSIONES | | | | | |
 |:---:|---|---|---|---|---|
 | Versión | Hecha por | Revisada por | Aprobada por | Fecha | Motivo |
-| 1.0 | IASR, JSCM | IASR, JSCM | PCQL | 30/04/2026 | Versión Original |
-
-<div style="page-break-after: always; visibility: hidden"></div>
-
-**Sistema: SQL-SafeBridge — Orquestador de Backups y Prueba de Restauración con Validación de Integridad (SQL Server)**
-
-**Documento FD03: Historias de Usuario, Criterios de Aceptación y Diagramas de Secuencia**
-
-**Versión 1.0**
+| 1.0 | IASR / JSCM | Ing. P. Cuadros | Ing. P. Cuadros | 06/05/2026 | Versión Original |
 
 <div style="page-break-after: always; visibility: hidden"></div>
 
@@ -47,736 +47,472 @@ Integrantes:
 
 # ÍNDICE GENERAL
 
-1. [Introducción](#1-introducción)
-   - 1.1 Propósito
-   - 1.2 Alcance
-   - 1.3 Definiciones, Siglas y Abreviaturas
-   - 1.4 Referencias
-   - 1.5 Visión General
-2. [Generalidades de la Empresa](#2-generalidades-de-la-empresa)
-   - 2.1 Nombre de la Empresa
-   - 2.2 Visión
-   - 2.3 Misión
-   - 2.4 Organigrama
-3. [Visionamiento de Empresa](#3-visionamiento-de-empresa)
-   - 3.1 Descripción del Problema
-   - 3.2 Objetivos de Negocio
-   - 3.3 Objetivos de Diseño
-   - 3.4 Alcance del Proyecto
-   - 3.5 Viabilidad del Sistema
-   - 3.6 Información Obtenida del Levantamiento de Información
-4. [Análisis de Procesos](#4-análisis-de-procesos)
-   - 4.1 Diagrama de Proceso Actual – Diagrama de Actividades
-   - 4.2 Diagrama de Proceso Propuesto – Diagrama de Actividades
-5. [Análisis de Requerimientos de Software](#5-análisis-de-requerimientos-de-software)
-   - 5.1 Cuadro de Requerimientos Funcionales Iniciales
-   - 5.2 Cuadro de Requerimientos No Funcionales
-   - 5.3 Cuadro de Requerimientos Funcionales Finales
-   - 5.4 Reglas de Negocio
-6. [Historias de Usuario](#6-historias-de-usuario)
-   - 6.1 HU-001: Autenticación contra SQL Server
-   - 6.2 HU-002: Backup FULL Automatizado
-   - 6.3 HU-003: Restore Test en Entorno Sandbox
-   - 6.4 HU-004: Validación de Integridad con DBCC CHECKDB
-   - 6.5 HU-005: Orquestación del Flujo Completo
-   - 6.6 HU-006: Sistema de Logging y Evidencias
-   - 6.7 HU-007: Interfaz Gráfica con Consola de Eventos
-   - 6.8 HU-008: Configuración de Rutas y Parámetros
-   - 6.9 Matriz de Trazabilidad con Requerimientos
-   - 6.10 Resumen de Issues en GitHub
-7. [Criterios de Aceptación en Formato Gherkin](#7-criterios-de-aceptación-en-formato-gherkin)
-   - 7.1 HU-001: Autenticación contra SQL Server
-   - 7.2 HU-002: Backup FULL Automatizado
-   - 7.3 HU-003: Restore Test en Entorno Sandbox
-   - 7.4 HU-004: Validación de Integridad con DBCC CHECKDB
-   - 7.5 HU-005: Orquestación del Flujo Completo
-   - 7.6 HU-006: Sistema de Logging y Evidencias
-   - 7.7 HU-007: Interfaz Gráfica con Consola de Eventos
-   - 7.8 HU-008: Configuración de Rutas y Parámetros
-8. [Diagramas de Secuencia](#8-diagramas-de-secuencia)
-   - 8.1 Login y Autenticación
-   - 8.2 Flujo Completo Backup + Validación
-   - 8.3 Manejo de Error durante el Flujo
-   - 8.4 Generación de Evidencias
-9. [Fase de Desarrollo](#9-fase-de-desarrollo)
-   - 9.1 Perfiles de Usuario
-   - 9.2 Modelo Conceptual
-   - 9.3 Modelo Lógico
-10. [Milestones y Plan de Implementación](#10-milestones-y-plan-de-implementación)
-- [Conclusiones](#conclusiones)
-- [Recomendaciones](#recomendaciones)
-- [Bibliografía](#bibliografía)
-- [Webgrafía](#webgrafía)
+1. [Gestión de Issues — Historias de Usuario](#1-gestión-de-issues--historias-de-usuario)
+2. [Criterios de Aceptación y Escenarios de Prueba (Gherkin)](#2-criterios-de-aceptación-y-escenarios-de-prueba-gherkin)
+   - [HU-01: Configurar Conexión a Motor de Base de Datos](#hu-01-configurar-conexión-a-motor-de-base-de-datos)
+   - [HU-02: Ejecutar Backup con Validación Automática](#hu-02-ejecutar-backup-con-validación-automática)
+   - [HU-03: Validar Integridad en Base Temporal](#hu-03-validar-integridad-en-base-temporal)
+   - [HU-04: Consultar Historial de Operaciones](#hu-04-consultar-historial-de-operaciones)
+   - [HU-05: Gestionar Credenciales de Forma Segura](#hu-05-gestionar-credenciales-de-forma-segura)
+3. [Diagramas de Secuencia](#3-diagramas-de-secuencia)
+   - [3.1 Flujo Completo: Backup y Validación Temporal](#31-flujo-completo-backup-y-validación-temporal)
+   - [3.2 Flujo de Conexión Segura y Validación de Credenciales Cifradas](#32-flujo-de-conexión-segura-y-validación-de-credenciales-cifradas)
+4. [Conclusiones](#4-conclusiones)
 
 <div style="page-break-after: always; visibility: hidden"></div>
 
 ---
 
-## 1. Introducción
+## 1. Gestión de Issues — Historias de Usuario
 
-### 1.1 Propósito
-
-El presente documento **FD03 — Historias de Usuario, Criterios de Aceptación y Diagramas de Secuencia** tiene como propósito detallar los requerimientos funcionales del sistema **SQL-SafeBridge** en formato de historias de usuario ágiles, especificar sus criterios de aceptación mediante escenarios Gherkin, y modelar las interacciones del sistema mediante diagramas de secuencia UML.
-
-Este documento sirve como especificación funcional detallada para el equipo de desarrollo y como artefacto de validación para los interesados del proyecto, asegurando que cada funcionalidad esté correctamente definida, sea verificable y esté alineada con los objetivos del sistema definidos en el Documento de Visión (FD02).
-
-### 1.2 Alcance
-
-El alcance de este documento comprende:
-
-- **8 historias de usuario** registradas como Issues en GitHub (#19 al #26), cubriendo el flujo completo del sistema: autenticación, backup, restore test, validación, orquestación, logging, interfaz gráfica y configuración.
-- **16 escenarios Gherkin** (2 por cada historia de usuario: un escenario exitoso y un escenario de error o condición límite).
-- **4 diagramas de secuencia UML** en formato Mermaid que modelan las interacciones principales entre actores, capas de la arquitectura y SQL Server.
-- **Matriz de trazabilidad** que vincula cada historia de usuario con los requerimientos funcionales y no funcionales definidos en el FD02.
-- **Perfiles de usuario, modelo conceptual y modelo lógico** como parte de la fase de desarrollo.
-- **Plan de implementación** organizado por milestones alineados con el roadmap del proyecto.
-
-Quedan fuera del alcance de este documento:
-
-- Especificaciones técnicas de bajo nivel (consultar documentación de arquitectura en la GitHub Wiki).
-- Pruebas unitarias detalladas (consultar plan de pruebas en la GitHub Wiki).
-
-### 1.3 Definiciones, Siglas y Abreviaturas
-
-| Término | Definición |
-|---------|-----------|
-| **HU** | Historia de Usuario — descripción de una funcionalidad desde la perspectiva del usuario. |
-| **Gherkin** | Lenguaje de dominio específico para describir escenarios de prueba en formato DADO/CUANDO/ENTONCES. |
-| **Issue** | Unidad de trabajo registrada en GitHub que representa una tarea, mejora o bug. |
-| **Label** | Etiqueta de clasificación aplicada a Issues en GitHub (ej. `feature`, `bug`, `high-priority`). |
-| **Milestone** | Hito del proyecto que agrupa Issues con una fecha objetivo común. |
-| **UML** | Unified Modeling Language — lenguaje estándar para modelar sistemas de software. |
-| **Mermaid** | Herramienta de diagramación basada en texto, compatible con Markdown y GitHub. |
-| **Clean Architecture** | Enfoque de arquitectura que separa UI, casos de uso, entidades e infraestructura. |
-| **DBA** | Database Administrator — Administrador de Bases de Datos. |
-| **Sandbox** | Base de datos temporal restaurada desde el backup, separada de producción. |
-| **DBCC CHECKDB** | Comando de SQL Server que valida consistencia lógica y física de una base de datos. |
-| **RTO** | Recovery Time Objective — máximo tiempo aceptable para restablecer el servicio. |
-| **RPO** | Recovery Point Objective — máximo período aceptable de pérdida de datos. |
-| **SHA256** | Secure Hash Algorithm de 256 bits — función hash criptográfica para verificar integridad de archivos. |
-
-### 1.4 Referencias
-
-Los siguientes documentos y estándares son referencias relevantes para este documento:
-
-- Documento de Visión SQL-SafeBridge (FD02) — Versión 1.0, marzo 2026.
-- Informe de Factibilidad SQL-SafeBridge (FD01) — Versión 1.0, marzo 2026.
-- GitHub Issues del repositorio SQL-SafeBridge: Issues #19 al #26.
-- Microsoft SQL Server Documentation: BACKUP/RESTORE — https://learn.microsoft.com/en-us/sql/
-- Microsoft SQL Server Documentation: DBCC CHECKDB — https://learn.microsoft.com/en-us/sql/
-- IEEE 830-1998 — Recommended Practice for Software Requirements Specifications.
-- Especificación Gherkin — https://cucumber.io/docs/gherkin/
-- GitHub Docs: About Wikis — https://docs.github.com/en/communities/documenting-your-project-with-wikis
-
-### 1.5 Visión General
-
-El documento FD03 se estructura en las siguientes secciones principales:
-
-1. **Generalidades de la Empresa:** Nombre, visión, misión y organigrama de SQL-SafeBridge.
-2. **Visionamiento de Empresa:** Problema identificado, objetivos de negocio, objetivos de diseño y alcance.
-3. **Análisis de Procesos:** Diagramas de actividades del proceso actual y propuesto.
-4. **Análisis de Requerimientos:** Requerimientos funcionales, no funcionales y reglas de negocio.
-5. **Historias de Usuario:** Cada funcionalidad en formato "Como... Quiero... Para...", vinculada a su Issue en GitHub.
-6. **Criterios de Aceptación en Formato Gherkin:** Escenarios de prueba exitosos y de error.
-7. **Diagramas de Secuencia:** Interacciones entre actores, capas de arquitectura y SQL Server.
-8. **Fase de Desarrollo:** Perfiles de usuario, modelo conceptual y modelo lógico.
-9. **Milestones y Plan de Implementación:** Organización del trabajo en hitos.
-
-<div style="page-break-after: always; visibility: hidden"></div>
+Las historias de usuario representan los requisitos funcionales del sistema desde la perspectiva del usuario final. Cada historia sigue el formato canónico de la metodología ágil: **Como [rol]... Quiero [acción]... Para [resultado].**
 
 ---
 
-## 2. Generalidades de la Empresa
+### HU-01 — Configurar Conexión a Motor de Base de Datos
 
-### 2.1 Nombre de la Empresa
+> **Como** administrador de base de datos,
+> **Quiero** poder configurar y guardar una conexión a cualquiera de los cinco motores de base de datos soportados (SQL Server, MySQL, PostgreSQL, Oracle, SQLite),
+> **Para** poder seleccionar el motor apropiado según el entorno de trabajo sin necesidad de re-ingresar las credenciales en cada sesión.
 
-**SQL-SafeBridge**
-
-### 2.2 Visión
-
-Consolidarnos como la principal aliada tecnológica en la región de Tacna, liderando soluciones de protección y resiliencia de datos corporativos con innovación y confiabilidad.
-
-### 2.3 Misión
-
-Proveer soluciones automatizadas de respaldo y recuperación que garanticen la continuidad del negocio de nuestros clientes, reduciendo riesgos operativos y asegurando el cumplimiento normativo.
-
-### 2.4 Organigrama
-┌─────────────────────┐
-│ Gerente General │
-│ Iker Sierra Ruiz │
-└──────────┬──────────┘
-│
-┌─────────────────────┼─────────────────────┐
-│ │ │
-┌────────────▼──────────┐ ┌───────▼──────────┐ ┌───────▼──────────┐
-│ Jefe de Desarrollo │ │ Jefe de Calidad │ │ Jefe de Soporte │
-│ Julio Cortez Mamani │ │ (Por designar) │ │ (Por designar) │
-└───────────┬───────────┘ └──────────────────┘ └──────────────────┘
-│
-┌───────────┼───────────┐
-│ │ │
-┌───▼────┐ ┌───▼────┐ ┌───▼────┐
-│ Backend│ │Frontend│ │ QA │
-│ Dev │ │ Dev │ │ Tester │
-└────────┘ └────────┘ └────────┘
-
-<div style="page-break-after: always; visibility: hidden"></div>
+**Prioridad:** Alta  
+**Milestone:** v1.0  
+**Labels:** `feature`, `infrastructure`
 
 ---
 
-## 3. Visionamiento de Empresa
+### HU-02 — Ejecutar Backup con Validación Automática
 
-### 3.1 Descripción del Problema
+> **Como** administrador de base de datos,
+> **Quiero** poder iniciar el proceso de backup de una base de datos seleccionada especificando la ruta de destino,
+> **Para** obtener un archivo de respaldo validado que garantice su restaurabilidad, con registro completo del proceso en el terminal de la aplicación.
 
-Actualmente, existe una brecha de seguridad alarmante: mientras los administradores de bases de datos dedican entre el 20% y 30% de su tiempo a tareas manuales de backup, la mayoría de las empresas omite las pruebas de recuperación. Este escenario no solo amenaza la integridad de la información, sino que expone a la entidad a sanciones legales por incumplimiento de estándares como ISO 27001, PCI-DSS y normativas locales de protección de datos.
-
-Los problemas específicos identificados son:
-
-| Problema | Impacto |
-|----------|---------|
-| Backups manuales propensos a error humano | Pérdida de datos, retrasos operativos |
-| Ausencia de pruebas de restauración | Backups inservibles detectados solo en emergencias |
-| Falta de validación de integridad | Datos corruptos no detectados a tiempo |
-| Sin registro de evidencias | Incumplimiento normativo y de auditoría |
-| Procesos no estandarizados | Dependencia del conocimiento individual del DBA |
-
-### 3.2 Objetivos de Negocio
-
-- **OB-01:** Automatizar el ciclo de backup para liberar el 80% del tiempo técnico del DBA.
-- **OB-02:** Garantizar restauraciones exitosas mediante pruebas automáticas en entorno sandbox.
-- **OB-03:** Asegurar cumplimiento normativo absoluto con generación de evidencias auditables.
-
-### 3.3 Objetivos de Diseño
-
-- **OD-01:** Interfaz gráfica intuitiva (máximo 3 clics por operación).
-- **OD-02:** Tiempo de restauración de prueba < 4 horas.
-- **OD-03:** Soporte para SQL Server (versión inicial).
-- **OD-04:** Arquitectura limpia con separación de capas (Clean Architecture).
-- **OD-05:** Generación automática de logs en formato .log y .json.
-
-### 3.4 Alcance del Proyecto
-
-| Aspecto | Detalle |
-|---------|---------|
-| Duración | 4 meses (marzo - junio 2026) |
-| Funcionalidades | Backups automáticos + validación DBCC + pruebas de restauración + logging |
-| Motor soportado | SQL Server 2022 (Developer/Express) |
-| Tipo de aplicación | Escritorio (Python + customtkinter) |
-| Exclusiones | Soporte Oracle (fase 2), interfaz web (fase 3) |
-| Entregables | Aplicación de escritorio, documentación técnica, manual de usuario |
-
-### 3.5 Viabilidad del Sistema
-
-*(Por completar con análisis de factibilidad técnica, operativa y económica)*
-
-### 3.6 Información Obtenida del Levantamiento de Información
-
-*(Por completar con resultados de entrevistas, encuestas u observaciones realizadas durante la fase de relevamiento)*
-
-<div style="page-break-after: always; visibility: hidden"></div>
+**Prioridad:** Alta  
+**Milestone:** v1.0  
+**Labels:** `feature`, `backup`
 
 ---
 
-## 4. Análisis de Procesos
+### HU-03 — Validar Integridad en Base Temporal (Sandbox)
 
-### 4.1 Diagrama de Proceso Actual – Diagrama de Actividades
+> **Como** DBA (Administrador de Base de Datos),
+> **Quiero** que el sistema restaure automáticamente el archivo de backup en una base de datos temporal y verifique la presencia e integridad de sus tablas,
+> **Para** tener certeza científica de que el backup es funcional y restaurable antes de depender de él en un escenario de recuperación ante desastres.
 
-El siguiente diagrama modela el flujo actual de trabajo del DBA al realizar backups y pruebas de restauración de forma manual:
-
-```mermaid
-flowchart TD
-    A[Inicio] --> B[DBA recuerda hacer backup]
-    B --> C[Ejecuta script manual en SSMS]
-    C --> D[Espera finalización]
-    D --> E{¿Terminó sin errores?}
-    E -->|Sí| F[Guarda archivo .bak en disco]
-    E -->|No| G[Revisa errores y reintenta]
-    G --> C
-    F --> H[Registra en Excel manualmente]
-    H --> I{¿Hay tiempo para restore test?}
-    I -->|Sí| J[Restaura manualmente en otra BD]
-    I -->|No| K[Omite prueba de restauración]
-    J --> L[Ejecuta DBCC CHECKDB manualmente]
-    L --> M[Registra resultado en Excel]
-    K --> N[Fin - Backup sin validar]
-    M --> O[Fin - Backup validado]
-    
-### 4.2 Diagrama de Proceso Propuesto – Diagrama de Actividades
-El siguiente diagrama modela el flujo automatizado propuesto con SQL-SafeBridge:
-flowchart TD
-    A[Inicio] --> B[DBA autentica en SQL-SafeBridge]
-    B --> C[Selecciona base de datos]
-    C --> D[Clic en Backup + Validación]
-    D --> E[Sistema ejecuta BACKUP DATABASE]
-    E --> F[Genera archivo .bak con naming automático]
-    F --> G[Sistema restaura en sandbox]
-    G --> H{¿Restauración exitosa?}
-    H -->|Sí| I[Sistema ejecuta DBCC CHECKDB]
-    H -->|No| J[Registra error y detiene flujo]
-    I --> K{¿CHECKDB sin errores?}
-    K -->|Sí| L[Marcar backup como Validado]
-    K -->|No| M[Marcar backup como No Validado]
-    L --> N[Generar evidencias .log y .json]
-    M --> N
-    J --> N
-    N --> O[Limpiar BD sandbox]
-    O --> P[Mostrar resultado en GUI]
-    P --> Q[Fin]
-
-Mejoras del proceso propuesto:
-
-Automatización completa: el DBA solo requiere 3 clics.
-
-Nomenclatura estandarizada de archivos.
-
-Trazabilidad automática con logs estructurados.
-
-Validación de integridad obligatoria en cada ejecución.
-
-Limpieza automática del entorno sandbox.
-
-<div style="page-break-after: always; visibility: hidden"></div>
-5. Análisis de Requerimientos de Software
-5.1 Cuadro de Requerimientos Funcionales Iniciales
-ID	REQUERIMIENTO
-RF-01	Permitir programar backups diarios y semanales
-RF-02	Soportar conexiones con SQL Server
-RF-03	Calcular y almacenar hash SHA256 de los backups
-RF-04	Ejecutar la restauración de prueba automáticamente
-RF-05	Enviar alertas de seguridad por correo
-RF-06	Tener una interfaz de escritorio intuitiva
-RF-07	Generar logs de auditoría en formatos .log y .json
-RF-08	Permitir recuperar la base de datos desde el backup
-5.2 Cuadro de Requerimientos No Funcionales
-ID	REQUERIMIENTO
-RNF-1	Disponibilidad del sistema a tiempo completo
-RNF-2	Tener el menor tiempo de restauración posible
-RNF-3	Tener una seguridad especial para los datos personales
-RNF-4	Cumplir con las normas de auditoría (ISO 27001)
-RNF-5	Ser accesible y fácil de usar
-RNF-6	Las credenciales no deben persistirse en texto plano
-5.3 Cuadro de Requerimientos Funcionales Finales
-(Por completar tras la validación con stakeholders y refinamiento de los requerimientos iniciales)
-
-5.4 Reglas de Negocio
-ID	REGLA DE NEGOCIO
-RN-01	El backup solo se considera válido si supera la prueba de Hash SHA256
-RN-02	No se pueden eliminar backups que no superen los 30 días de antigüedad
-RN-03	Cada restauración de prueba se debe realizar en un entorno aislado (sandbox)
-RN-04	Solo usuarios con rol sysadmin pueden ejecutar operaciones de backup
-RN-05	Las evidencias deben conservarse por un mínimo de 90 días
-RN-06	El sistema debe validar que la ruta de backup sea accesible antes de ejecutar
-RN-07	La BD sandbox debe eliminarse automáticamente tras la validación
-RN-08	Los logs no deben contener contraseñas ni datos sensibles
-<div style="page-break-after: always; visibility: hidden"></div>
-6. Historias de Usuario
-A continuación se presentan las historias de usuario registradas como Issues en GitHub, siguiendo el formato estándar de redacción de requerimientos ágiles. Cada historia está vinculada a un Issue real del repositorio y se complementa con su información de trazabilidad, capa arquitectónica y archivos de implementación.
-
-6.1 HU-001: Autenticación contra SQL Server
-Campo	Valor
-Issue GitHub	#19
-Como	DBA
-Quiero	Autenticarme con credenciales SQL Server
-Para	Acceder de forma segura al sistema y gestionar backups
-Capa arquitectónica	Presentation + Infrastructure
-Labels	feature, authentication, high-priority
-Milestone	M1 — Conexión y Backup
-Archivos	presentation/login_screen.py, infrastructure/sql_server_repository.py
-Tecnología	customtkinter para UI, pyodbc para conexión
-Descripción detallada:
-
-El sistema debe proporcionar una pantalla de login donde el DBA ingrese las credenciales de SQL Server (servidor, usuario y contraseña). Una vez ingresadas, el sistema debe verificar que la conexión sea exitosa y que el usuario posea el rol sysadmin, requerido para ejecutar operaciones de backup y restore. Si el usuario no cumple con los permisos necesarios, el sistema debe denegar el acceso y mostrar un mensaje informativo. Las credenciales no deben persistirse en texto plano en ningún momento.
-
-6.2 HU-002: Backup FULL Automatizado
-Campo	Valor
-Issue GitHub	#20
-Como	DBA
-Quiero	Ejecutar backups FULL con un clic desde la GUI
-Para	Estandarizar las copias de seguridad y evitar errores manuales
-Capa arquitectónica	Application
-Labels	feature, backup, high-priority
-Milestone	M1 — Conexión y Backup
-Archivos	application/backup_use_case.py
-Dependencia	HU-001 (Autenticación exitosa)
-Descripción detallada:
-
-El sistema debe permitir al DBA seleccionar una base de datos desde un dropdown y ejecutar un backup FULL con un solo clic. El nombre del archivo .bak debe generarse automáticamente siguiendo el formato BD_YYYYMMDD_HHMMSS_FULL.bak. El sistema debe capturar y registrar métricas de la operación: tiempo de inicio, tiempo de finalización, duración total y tamaño del archivo generado. El progreso debe mostrarse en tiempo real en la consola de eventos de la GUI.
-
-6.3 HU-003: Restore Test en Entorno Sandbox
-Campo	Valor
-Issue GitHub	#21
-Como	DBA
-Quiero	Restaurar el backup en una base de datos sandbox
-Para	Verificar que el respaldo es realmente recuperable antes de un incidente real
-Capa arquitectónica	Application
-Labels	feature, restore, high-priority
-Milestone	M2 — Restore Sandbox
-Archivos	application/restore_use_case.py, application/restore_backup_use_case.py
-Dependencia	HU-002 (Backup generado exitosamente)
-Descripción detallada:
-
-Una vez generado el backup, el sistema debe restaurarlo automáticamente en una base de datos temporal (sandbox) para verificar su recuperabilidad. El proceso implica: (1) leer los logical files del backup mediante RESTORE FILELISTONLY, (2) construir la cláusula WITH MOVE para reubicar los archivos .mdf y .ldf en la ruta de sandbox configurada, y (3) ejecutar la restauración. La base de datos sandbox debe crearse con un sufijo identificable (ej. _Sandbox) y debe quedar accesible para consultas de validación posteriores.
-
-6.4 HU-004: Validación de Integridad con DBCC CHECKDB
-Campo	Valor
-Issue GitHub	#22
-Como	Auditor
-Quiero	Ejecutar DBCC CHECKDB en la base de datos restaurada
-Para	Confirmar que los datos no tienen corrupción y son íntegros
-Capa arquitectónica	Application
-Labels	feature, validation, audit
-Milestone	M3 — Validación DBCC
-Archivos	application/validation_use_case.py
-Dependencia	HU-003 (Restore Test exitoso)
-Descripción detallada:
-
-Sobre la base de datos sandbox restaurada, el sistema debe ejecutar el comando DBCC CHECKDB para validar la integridad física y lógica de los datos. El resultado del CHECKDB debe ser capturado y analizado: si no se encuentran errores de asignación ni de consistencia, el backup debe marcarse como "Validado"; si se detectan errores, debe marcarse como "No Validado". El resultado completo debe registrarse en los logs de evidencias y mostrarse en la consola de eventos de la GUI.
-
-6.5 HU-005: Orquestación del Flujo Completo
-Campo	Valor
-Issue GitHub	#23
-Como	DBA
-Quiero	Que el sistema ejecute Backup → Restore → Validación → Evidencia → Limpieza automáticamente
-Para	Ahorrar tiempo y evitar errores al ejecutar cada paso manualmente
-Capa arquitectónica	Application
-Labels	feature, orchestration, core
-Milestone	M4 — Flujo Completo
-Archivos	application/orchestrator.py
-Dependencia	HU-002, HU-003, HU-004, HU-006, HU-008
-Descripción detallada:
-
-El orquestador es el componente central que coordina la ejecución secuencial del flujo completo: Backup → Restore Test → Validación (DBCC CHECKDB) → Generación de Evidencias → Limpieza de Sandbox. Debe ejecutar cada fase en orden, verificando que la fase anterior se complete exitosamente antes de avanzar. Si alguna fase falla, el orquestador debe detener el flujo, registrar el error indicando la fase donde ocurrió, y notificar al usuario a través de la GUI. El progreso de cada fase debe actualizarse en tiempo real en el dashboard.
-
-6.6 HU-006: Sistema de Logging y Evidencias
-Campo	Valor
-Issue GitHub	#24
-Como	Auditor
-Quiero	Logs detallados en formato .log y .json por cada ejecución
-Para	Tener trazabilidad completa de quién ejecutó qué, cuándo y con qué resultado
-Capa arquitectónica	Shared Kernel
-Labels	feature, logging, audit
-Milestone	M3 — Validación DBCC
-Archivos	shared/logger.py
-Carpeta de salida	logs/
-Descripción detallada:
-
-Cada ejecución del flujo (o de operaciones individuales) debe generar dos archivos de evidencia: un archivo .log con formato legible que incluya timestamps, descripción de cada paso, métricas (tiempos, tamaños) y resultados; y un archivo .json con los mismos datos en formato estructurado para procesamiento automatizado. Los archivos deben nombrarse con el patrón restore_backup_YYYYMMDD_HHMMSS. Bajo ninguna circunstancia los logs deben contener contraseñas ni datos sensibles de conexión.
-
-6.7 HU-007: Interfaz Gráfica con Consola de Eventos
-Campo	Valor
-Issue GitHub	#25
-Como	Usuario
-Quiero	Ver el progreso de cada paso en tiempo real en la GUI
-Para	Saber qué está ocurriendo sin necesidad de revisar archivos de log
-Capa arquitectónica	Presentation
-Labels	feature, UI, enhancement
-Milestone	M2 — Restore Sandbox
-Archivos	presentation/dashboard_screen.py, presentation/dialogs.py
-Tecnología	customtkinter
-Descripción detallada:
-
-La interfaz gráfica debe incluir un dashboard con una consola de eventos que muestre en tiempo real el progreso de cada operación. Debe utilizar indicadores visuales claros: ✅ para éxito, ❌ para error, 🔄 para operaciones en progreso, y 🧹 para limpieza. Debe incluir una barra de progreso segmentada por fases del flujo. El dashboard debe permitir seleccionar la base de datos de un dropdown, y ofrecer botones para ejecutar Backup, Validación (flujo completo) y acceder a Configuración.
-
-6.8 HU-008: Configuración de Rutas y Parámetros
-Campo	Valor
-Issue GitHub	#26
-Como	DBA
-Quiero	Configurar las rutas de almacenamiento de backups y sandbox
-Para	Adaptar el sistema a la infraestructura de mi organización
-Capa arquitectónica	Presentation
-Labels	feature, configuration, enhancement
-Milestone	M2 — Restore Sandbox
-Archivos	presentation/dialogs.py
-Tecnología	customtkinter
-Descripción detallada:
-
-El sistema debe proporcionar un diálogo de configuración accesible desde el dashboard, donde el DBA pueda establecer las rutas de almacenamiento para los archivos de backup y para los archivos de la base de datos sandbox. Las rutas ingresadas deben ser validadas (existencia o posibilidad de creación) antes de guardarse. La configuración debe persistir entre sesiones para evitar que el usuario deba reingresarla cada vez.
-
-6.9 Matriz de Trazabilidad con Requerimientos
-La siguiente matriz vincula cada historia de usuario con los requerimientos funcionales (RF) y no funcionales (RNF) definidos en el Documento de Visión (FD02), así como con las reglas de negocio (RN) aplicables.
-
-Historia de Usuario	RF-01	RF-02	RF-03	RF-04	RF-05	RF-06	RF-07	RF-08	RNF-1	RNF-2	RNF-3	RNF-4	RNF-5	RNF-6	RN-01	RN-02	RN-03	RN-04	RN-05	RN-06	RN-07	RN-08
-HU-001 Autenticación		✅							✅		✅	✅		✅				✅				
-HU-002 Backup FULL	✅		✅																	✅		
-HU-003 Restore Sandbox				✅				✅		✅							✅					
-HU-004 DBCC CHECKDB							✅					✅			✅							
-HU-005 Orquestador	✅			✅																	✅	
-HU-006 Logging							✅		✅			✅							✅			✅
-HU-007 GUI						✅							✅									
-HU-008 Configuración						✅										✅				✅		
-6.10 Resumen de Issues en GitHub
-#	Historia de Usuario	Issue	Prioridad	Milestone	Estado
-| 1 | Autenticación	#19	Alta	M1	✅
-| 2 |	Backup FULL	#20	Alta	M1	
-| 3 | Restore Sandbox | #21 | Alta | M2 | ✅ |
-| 4 | DBCC CHECKDB | #22 | Alta | M3 | ✅ |
-| 5 | Orquestador | #23 | Alta | M4 | ✅ |
-| 6 | Logging | #24 | Alta | M3 | ✅ |
-| 7 | GUI | #25 | Media | M2 | ✅ |
-| 8 | Configuración | #26 | Media | M2 | ✅ |
-
-<div style="page-break-after: always; visibility: hidden"></div>
+**Prioridad:** Alta  
+**Milestone:** v1.0  
+**Labels:** `feature`, `validation`, `security`
 
 ---
 
-## 7. Criterios de Aceptación en Formato Gherkin
+### HU-04 — Consultar Historial y Logs de Operaciones
 
-Por cada historia de usuario se presentan dos escenarios de prueba en formato Gherkin (DADO... CUANDO... ENTONCES...): un **escenario exitoso** que describe el comportamiento esperado bajo condiciones normales, y un **escenario de error o condición límite** que describe el comportamiento ante fallos o condiciones excepcionales.
+> **Como** auditor de sistemas o administrador de TI,
+> **Quiero** poder visualizar el historial de todas las operaciones de backup y validación ejecutadas, con su resultado (EXITOSO / ERROR / VALIDADO), marca de tiempo y detalle del log,
+> **Para** disponer de trazabilidad completa de las actividades de respaldo y poder demostrar el cumplimiento de políticas de continuidad del negocio.
+
+**Prioridad:** Media  
+**Milestone:** v1.0  
+**Labels:** `feature`, `audit`, `logging`
 
 ---
 
-### 7.1 HU-001: Autenticación contra SQL Server
+### HU-05 — Gestionar Credenciales de Forma Segura
+
+> **Como** usuario de SafeBridge,
+> **Quiero** que mis credenciales de conexión (usuario, contraseña, host, puerto) se almacenen de forma cifrada en mi equipo y sean recuperadas automáticamente al iniciar la aplicación,
+> **Para** no tener que re-ingresar contraseñas en cada sesión y tener la garantía de que mis credenciales no se exponen en texto plano en el sistema de archivos.
+
+**Prioridad:** Alta  
+**Milestone:** v1.0  
+**Labels:** `security`, `feature`
+
+---
+
+<div style="page-break-after: always; visibility: hidden"></div>
+
+## 2. Criterios de Aceptación y Escenarios de Prueba (Gherkin)
+
+Los escenarios de prueba se redactan en lenguaje **Gherkin** (Given-When-Then), que sirve tanto como documentación de requisitos como base para pruebas de aceptación automatizadas con frameworks como `behave` (Python).
+
+---
+
+### HU-01: Configurar Conexión a Motor de Base de Datos
+
+**Escenario 1: Conexión exitosa a MySQL**
 
 ```gherkin
-Feature: Autenticación contra SQL Server
-  Como DBA
-  Quiero autenticarme con credenciales SQL Server
-  Para acceder de forma segura al sistema
+Feature: Configuración de conexión a motor de base de datos
 
-  Scenario: Login exitoso con credenciales válidas y rol sysadmin
-    DADO QUE el usuario tiene credenciales válidas de SQL Server
-    Y el usuario tiene el rol sysadmin
-    CUANDO ingresa servidor "localhost\SQLEXPRESS", usuario "admin" y contraseña "****"
-    Y hace clic en "Conectar"
-    ENTONCES el sistema muestra el Dashboard principal
-    Y el sistema registra "Conexión establecida" en los logs
-    Y habilita todas las funciones de backup y restore
+  Scenario: Conexión exitosa a MySQL con credenciales válidas
+    DADO que el usuario ha seleccionado el motor "MySQL"
+      Y ha ingresado el host "localhost", puerto "3306",
+        usuario "root" y contraseña válida
+    CUANDO hace clic en el botón "Probar Conexión"
+    ENTONCES el sistema muestra el mensaje "Conexión exitosa"
+      Y el botón "Guardar Conexión" se habilita
+      Y el combobox de bases de datos se puebla con las BDs disponibles
+```
 
-  Scenario: Login fallido por falta de permisos sysadmin
-    DADO QUE el usuario tiene credenciales válidas de SQL Server
-    PERO el usuario NO tiene el rol sysadmin
-    CUANDO ingresa servidor, usuario y contraseña
-    Y hace clic en "Conectar"
-    ENTONCES el sistema muestra el mensaje "Permisos insuficientes: se requiere rol sysadmin"
-    Y NO habilita las funciones de backup
-    Y registra el intento fallido en los logs
-### 7.2 HU-002: Backup FULL Automatizado
-Feature: Backup FULL Automatizado
-  Como DBA
-  Quiero ejecutar backups FULL con un clic
-  Para estandarizar las copias de seguridad
+**Escenario 2: Fallo de conexión por credenciales incorrectas**
 
-  Scenario: Backup FULL generado exitosamente
-    DADO QUE el usuario está autenticado con rol sysadmin
-    Y ha seleccionado la base de datos "VentasDB"
-    Y la ruta de backup "C:\Backups\" es accesible
-    CUANDO hace clic en "Ejecutar Backup"
-    ENTONCES el sistema ejecuta BACKUP DATABASE correctamente
-    Y genera el archivo "VentasDB_20260430_143000_FULL.bak"
-    Y calcula y almacena el hash SHA256 del archivo
-    Y muestra el tamaño del archivo en la consola
-    Y registra tiempo de inicio, fin y tamaño en logs
+```gherkin
+  Scenario: Fallo de conexión por contraseña incorrecta
+    DADO que el usuario ha seleccionado el motor "PostgreSQL"
+      Y ha ingresado credenciales con contraseña incorrecta
+    CUANDO hace clic en el botón "Probar Conexión"
+    ENTONCES el sistema muestra un mensaje de error descriptivo
+      Y el terminal widget registra el error con nivel "ERROR"
+      Y el botón "Guardar Conexión" permanece deshabilitado
+```
 
-  Scenario: Backup fallido por ruta inaccesible
-    DADO QUE el usuario está autenticado con rol sysadmin
-    Y ha seleccionado una base de datos
-    PERO la ruta de backup no es accesible por SQL Server
-    CUANDO hace clic en "Ejecutar Backup"
-    ENTONCES el sistema muestra "Error: Ruta de backup no accesible"
-    Y NO genera archivo .bak
-    Y registra el error en los logs con nivel ERROR
-### 7.3 HU-003: Restore Test en Entorno Sandbox
-Feature: Restore Test en Entorno Sandbox
-  Como DBA
-  Quiero restaurar el backup en una BD temporal
-  Para verificar que el respaldo es recuperable
+**Escenario 3: Conexión a SQLite mediante ruta de archivo**
 
-  Scenario: Restauración exitosa en sandbox
-    DADO QUE existe un archivo .bak válido en "C:\Backups\"
-    Y el usuario tiene permisos suficientes
-    CUANDO se ejecuta el restore test
-    ENTONCES el sistema lee los logical files con RESTORE FILELISTONLY
-    Y restaura la BD en "VentasDB_Sandbox" usando WITH MOVE
-    Y la BD sandbox queda accesible para consultas
-    Y registra "Restauración completada" en la consola
+```gherkin
+  Scenario: Conexión exitosa a SQLite mediante ruta de archivo
+    DADO que el usuario ha seleccionado el motor "SQLite"
+      Y ha especificado la ruta "/home/user/data/mydb.sqlite"
+    CUANDO hace clic en el botón "Probar Conexión"
+    ENTONCES el sistema verifica que el archivo existe y es un SQLite válido
+      Y muestra "Conexión exitosa" con el nombre del archivo
+```
 
-  Scenario: Restauración fallida por espacio insuficiente
-    DADO QUE existe un archivo .bak válido
-    PERO el espacio en disco es insuficiente
-    CUANDO se ejecuta el restore test
-    ENTONCES el sistema muestra "Error: Espacio insuficiente en disco"
-    Y NO crea la BD sandbox
-    Y registra el error en logs
-###   7.3 HU-003: Restore Test en Entorno Sandbox
-Feature: Restore Test en Entorno Sandbox
-  Como DBA
-  Quiero restaurar el backup en una BD temporal
-  Para verificar que el respaldo es recuperable
+---
 
-  Scenario: Restauración exitosa en sandbox
-    DADO QUE existe un archivo .bak válido en "C:\Backups\"
-    Y el usuario tiene permisos suficientes
-    CUANDO se ejecuta el restore test
-    ENTONCES el sistema lee los logical files con RESTORE FILELISTONLY
-    Y restaura la BD en "VentasDB_Sandbox" usando WITH MOVE
-    Y la BD sandbox queda accesible para consultas
-    Y registra "Restauración completada" en la consola
+### HU-02: Ejecutar Backup con Validación Automática
 
-  Scenario: Restauración fallida por espacio insuficiente
-    DADO QUE existe un archivo .bak válido
-    PERO el espacio en disco es insuficiente
-    CUANDO se ejecuta el restore test
-    ENTONCES el sistema muestra "Error: Espacio insuficiente en disco"
-    Y NO crea la BD sandbox
-    Y registra el error en logs
-### 7.4 HU-004: Validación de Integridad con DBCC CHECKDB
-Feature: Validación de Integridad con DBCC CHECKDB
-  Como auditor
-  Quiero ejecutar DBCC CHECKDB en la BD restaurada
-  Para confirmar la integridad de los datos
+**Escenario 1: Backup exitoso con validación**
 
-  Scenario: DBCC CHECKDB sin errores
-    DADO QUE la BD sandbox "VentasDB_Sandbox" está accesible
-    Y los datos fueron restaurados correctamente
-    CUANDO se ejecuta DBCC CHECKDB
-    ENTONCES el resultado es "CHECKDB found 0 allocation errors and 0 consistency errors"
-    Y el sistema marca el backup como "Validado"
-    Y registra "CHECKDB: Sin errores" en logs
+```gherkin
+Feature: Ejecución de backup y validación automática
 
-  Scenario: DBCC CHECKDB detecta corrupción
-    DADO QUE la BD sandbox está accesible
-    PERO existen errores de consistencia en los datos
-    CUANDO se ejecuta DBCC CHECKDB
-    ENTONCES el sistema detecta los errores
-    Y marca el backup como "No Validado"
-    Y registra el detalle de errores en logs
-    Y muestra "CHECKDB: Errores detectados" en la consola
-### 7.5 HU-005: Orquestación del Flujo Completo
-Feature: Orquestación del Flujo Completo
-  Como DBA
-  Quiero ejecutar el ciclo completo automáticamente
-  Para ahorrar tiempo y evitar errores manuales
+  Scenario: Backup y validación exitosos en MySQL
+    DADO que el usuario tiene una conexión activa al motor "MySQL"
+      Y ha seleccionado la base de datos "produccion_db"
+      Y ha especificado la ruta de destino "C:/backups/"
+    CUANDO hace clic en el botón "Iniciar Backup y Validar"
+    ENTONCES el sistema ejecuta el backup en un hilo separado
+      Y el terminal widget muestra en tiempo real los pasos del proceso
+      Y al finalizar muestra el mensaje "Backup y validación exitosos"
+      Y el archivo de backup es generado en la ruta especificada
+      Y el estado se registra como "VALIDADO" en el historial
+```
 
-  Scenario: Flujo completo exitoso
-    DADO QUE el usuario está autenticado
-    Y ha seleccionado la base de datos y configurado rutas
-    CUANDO hace clic en "Ejecutar Backup + Validación"
-    ENTONCES el orquestador ejecuta en secuencia:
-    Y 1. Backup FULL completado
-    Y 2. Restore Test completado
-    Y 3. DBCC CHECKDB completado sin errores
-    Y 4. Evidencias generadas (.log y .json)
-    Y 5. BD sandbox eliminada
-    Y el sistema muestra "Proceso completado exitosamente"
-    Y registra tiempo total de ejecución
+**Escenario 2: Error por espacio insuficiente en disco**
 
-  Scenario: Flujo interrumpido por error en restore
-    DADO QUE el backup se generó correctamente
-    PERO ocurre un error durante la restauración
-    CUANDO el orquestador detecta el error
-    ENTONCES detiene el flujo
-    Y registra el error indicando la fase donde ocurrió
-    Y NO ejecuta los pasos siguientes
-    Y limpia recursos temporales si es posible
-### 7.6 HU-006: Sistema de Logging y Evidencias
-Feature: Sistema de Logging y Evidencias
-  Como auditor
-  Quiero logs detallados por cada ejecución
-  Para tener trazabilidad completa
+```gherkin
+  Scenario: Error de backup por espacio insuficiente
+    DADO que el usuario intenta realizar un backup de una base de datos grande
+      Y la ruta de destino tiene menos de 500 MB libres
+    CUANDO el proceso de backup se ejecuta
+    ENTONCES el sistema captura la excepción de escritura
+      Y registra el error en el log con nivel "ERROR"
+      Y la cola de eventos devuelve el estado ("error", mensaje_descriptivo)
+      Y la UI notifica al usuario del fallo sin colgarse ni congelarse
+```
 
-  Scenario: Generación de logs tras ejecución exitosa
-    DADO QUE se ejecutó el flujo completo exitosamente
-    CUANDO finaliza la orquestación
-    ENTONCES se genera el archivo "restore_backup_YYYYMMDD_HHMMSS.log"
-    Y se genera el archivo "restore_backup_YYYYMMDD_HHMMSS.json"
-    Y el archivo .log contiene timestamps, pasos y resultado de cada fase
-    Y el archivo .json contiene datos estructurados con métricas
-    Y ningún archivo contiene contraseñas
+**Escenario 3: Backup ejecutado de forma no bloqueante**
 
-  Scenario: Logs registran errores correctamente
-    DADO QUE ocurrió un error durante el backup
-    CUANDO se captura la excepción
-    ENTONCES el archivo .log registra el error con nivel ERROR
-    Y el archivo .json incluye "final_status": "backup_failed"
-    Y se detalla el mensaje de error sin exponer información sensible
-### 7.7 HU-007: Interfaz Gráfica con Consola de Eventos
-Feature: Interfaz Gráfica con Consola de Eventos
-  Como usuario
-  Quiero ver el progreso en tiempo real en la GUI
-  Para saber qué está ocurriendo sin revisar archivos
+```gherkin
+  Scenario: La UI permanece responsiva durante el backup
+    DADO que el usuario ha iniciado un proceso de backup de larga duración
+    CUANDO el proceso está en ejecución en el hilo de trabajo
+    ENTONCES el usuario puede seguir interactuando con otros elementos de la UI
+      Y el terminal widget actualiza los mensajes de progreso en tiempo real
+      Y no se produce ningún congelamiento ("freezing") de la interfaz
+```
 
-  Scenario: Consola muestra progreso del flujo completo
-    DADO QUE el usuario ejecutó "Backup + Validación"
-    CUANDO el orquestador avanza por cada fase
-    ENTONCES la consola muestra en tiempo real:
-    Y "✅ Conexión establecida"
-    Y "🔄 Iniciando backup FULL..."
-    Y "✅ Backup completado (X MB)"
-    Y "🔄 Restaurando en sandbox..."
-    Y "✅ Restauración completada"
-    Y "🔄 Ejecutando DBCC CHECKDB..."
-    Y "✅ CHECKDB: Sin errores"
-    Y "🧹 Limpiando sandbox..."
-    Y "✅ Proceso completado (X segundos)"
+---
 
-  Scenario: Consola muestra error con indicador visual
-    DADO QUE ocurre un error durante la ejecución
-    CUANDO el sistema captura la excepción
-    ENTONCES la consola muestra "❌ Error: [descripción]"
-    Y el indicador visual cambia a estado de error
-    Y se mantiene visible el historial de pasos anteriores
-### 7.8 HU-008: Configuración de Rutas y Parámetros
-Feature: Configuración de Rutas y Parámetros
-  Como DBA
-  Quiero configurar las rutas de almacenamiento
-  Para adaptar el sistema a mi infraestructura
+### HU-03: Validar Integridad en Base Temporal (Sandbox)
 
-  Scenario: Configuración de rutas guardada exitosamente
-    DADO QUE el usuario abre el diálogo de configuración
-    CUANDO ingresa ruta de backups "C:\Backups\"
-    Y ruta de sandbox "C:\Sandbox\"
-    Y hace clic en "Guardar"
-    ENTONCES el sistema valida que las rutas existan o las crea
-    Y persiste la configuración
-    Y muestra "Configuración guardada correctamente"
+**Escenario 1: Validación completa exitosa**
 
-  Scenario: Configuración rechazada por ruta inválida
-    DADO QUE el usuario abre el diálogo de configuración
-    CUANDO ingresa una ruta con caracteres no permitidos
-    Y hace clic en "Guardar"
-    ENTONCES el sistema muestra "Ruta inválida"
-    Y NO guarda la configuración
-    Y mantiene la configuración anterior
+```gherkin
+Feature: Validación de integridad en base de datos temporal
+
+  Scenario: Validación exitosa de backup en sandbox
+    DADO que existe un archivo de backup válido en la ruta especificada
+      Y el motor de base de datos está disponible para restauración
+    CUANDO ValidationService.validate_backup() es invocado
+    ENTONCES el sistema crea la base temporal con nombre "tmp_val_YYYYMMDDHHMMSS"
+      Y restaura el backup en dicha base temporal
+      Y ejecuta verify_tables() comprobando que la base contiene al menos una tabla
+      Y elimina la base temporal con drop_database()
+      Y devuelve el resultado de validación al proceso padre
+```
+
+**Escenario 2: Backup corrupto detectado**
+
+```gherkin
+  Scenario: Detección de backup corrupto durante la restauración
+    DADO que el archivo de backup está dañado o es incompleto
+    CUANDO ValidationService intenta restaurarlo en la base temporal
+    ENTONCES el conector lanza una excepción durante el proceso de restore
+      Y el sistema registra el error con nivel "ERROR" indicando "Backup no restaurable"
+      Y la base temporal es eliminada si fue creada parcialmente
+      Y el estado del BackupRecord se marca como "ERROR"
+```
+
+**Escenario 3: Base temporal sin tablas (backup vacío)**
+
+```gherkin
+  Scenario: Backup restaurado pero sin estructura de tablas
+    DADO que el backup fue generado de una base de datos vacía
+    CUANDO verify_tables() es ejecutado sobre la base temporal
+    ENTONCES el método devuelve False
+      Y el sistema registra "WARNING: base temporal restaurada sin tablas detectadas"
+      Y el estado del BackupRecord se marca con detalle de la anomalía
+```
+
+---
+
+### HU-04: Consultar Historial y Logs de Operaciones
+
+**Escenario 1: Visualización de historial de backups**
+
+```gherkin
+Feature: Consulta de historial y logs de operaciones
+
+  Scenario: El usuario consulta el historial de backups exitosos
+    DADO que se han ejecutado al menos tres procesos de backup en sesiones anteriores
+      Y los registros fueron guardados en el sistema de log
+    CUANDO el usuario accede a la sección de historial en el dashboard
+    ENTONCES el sistema muestra una lista de registros con:
+        | Campo       | Ejemplo                         |
+        | Base de datos | produccion_db                 |
+        | Motor       | MySQL                           |
+        | Ruta        | C:/backups/produccion_20260506.sql |
+        | Timestamp   | 2026-05-06 14:32:00             |
+        | Estado      | VALIDADO                        |
+```
+
+**Escenario 2: Filtrado de logs por nivel de severidad**
+
+```gherkin
+  Scenario: El usuario filtra el terminal widget por nivel ERROR
+    DADO que el terminal widget muestra mensajes de nivel INFO, WARNING y ERROR
+    CUANDO el usuario selecciona el filtro "ERROR" en el panel de logs
+    ENTONCES el terminal widget solo muestra las líneas de nivel ERROR
+      Y las líneas de INFO y WARNING quedan ocultas temporalmente
+```
+
+**Escenario 3: Log con marca de tiempo precisa**
+
+```gherkin
+  Scenario: Cada entrada de log incluye marca de tiempo
+    DADO que SafeBridgeLogger está inicializado correctamente
+    CUANDO se registra cualquier evento mediante logger.info(), logger.error()
+    ENTONCES la entrada en el archivo de log contiene timestamp con formato
+      "YYYY-MM-DD HH:MM:SS.mmm [NIVEL] mensaje"
+      Y el archivo se encuentra en el directorio "~/.safebridge/logs/"
+```
+
+---
+
+### HU-05: Gestionar Credenciales de Forma Segura
+
+**Escenario 1: Primera ejecución — generación de clave Fernet**
+
+```gherkin
+Feature: Gestión segura de credenciales con cifrado Fernet
+
+  Scenario: Primera ejecución genera clave Fernet automáticamente
+    DADO que el archivo "~/.safebridge/fernet_key.key" no existe
+    CUANDO la aplicación es iniciada por primera vez
+    ENTONCES el sistema genera una clave Fernet de 32 bytes codificada en Base64
+      Y la persiste en "~/.safebridge/fernet_key.key" con permisos restrictivos
+      Y el directorio "~/.safebridge/" es creado si no existe
+```
+
+**Escenario 2: Guardar y recuperar conexión cifrada**
+
+```gherkin
+  Scenario: Guardar conexión y recuperarla en siguiente sesión
+    DADO que el usuario ha configurado una conexión válida a PostgreSQL
+    CUANDO hace clic en "Guardar Conexión"
+    ENTONCES el sistema cifra las credenciales con Fernet
+      Y persiste el resultado en "~/.safebridge/connections.json.enc"
+      Y al reiniciar la aplicación las conexiones guardadas aparecen disponibles
+      Y las contraseñas no son legibles inspeccionando el archivo .enc directamente
+```
+
+**Escenario 3: Manejo de clave corrupta o archivo inexistente**
+
+```gherkin
+  Scenario: Manejo graceful de archivo de conexiones dañado
+    DADO que el archivo "~/.safebridge/connections.json.enc" está corrupto
+    CUANDO la aplicación intenta cargar las conexiones guardadas
+    ENTONCES load_connections() captura la excepción de descifrado
+      Y devuelve una lista vacía sin lanzar error al usuario
+      Y el terminal widget registra un WARNING informando del evento
+```
+
 <div style="page-break-after: always; visibility: hidden"></div>
 
 ---
 
-## 8. Diagramas de Secuencia
+## 3. Diagramas de Secuencia
 
-A continuación se presentan los diagramas de secuencia UML para los flujos principales del sistema. Los diagramas están representados en formato **Mermaid**, compatible con GitHub Markdown.
+### 3.1 Flujo Completo: Backup y Validación Temporal
 
----
-
-### 8.1 Diagrama de Secuencia: Login y Autenticación
-
-**Flujo:** El usuario ingresa credenciales → LoginScreen → SQLServerRepository → SQL Server
+El siguiente diagrama ilustra el flujo completo desde que el usuario solicita un backup hasta que el sistema valida la integridad en la base temporal y devuelve el resultado.
 
 ```mermaid
 sequenceDiagram
     actor Usuario
-    participant LoginScreen
-    participant SQLServerRepository
-    participant SQLServer
+    participant UI as DashboardWindow<br/>(Presentation Layer)
+    participant BP as BackupProcess<br/>(Application Layer)
+    participant CS as ConnectionService<br/>(Application Layer)
+    participant VS as ValidationService<br/>(Application Layer)
+    participant DC as DatabaseConnector<br/>(Infrastructure Layer)
+    participant LOG as SafeBridgeLogger<br/>(Infrastructure Layer)
+    participant DB as Motor de BD<br/>(SQL Server/MySQL/etc.)
 
-    Usuario->>LoginScreen: Ingresa servidor, usuario, contraseña
-    Usuario->>LoginScreen: Clic en "Conectar"
-    LoginScreen->>SQLServerRepository: connect(server, user, password)
-    SQLServerRepository->>SQLServer: pyodbc.connect()
+    Usuario->>UI: Selecciona BD y ruta de backup
+    Usuario->>UI: Clic en "Iniciar Backup y Validar"
+    
+    UI->>BP: BackupProcess(config, db_name, output_path, logger)
+    UI->>BP: start()
+    BP-->>UI: Hilo daemon iniciado (non-blocking)
+    UI-->>Usuario: UI permanece responsiva
 
-    alt Conexión exitosa con sysadmin
-        SQLServer-->>SQLServerRepository: Conexión OK
-        SQLServerRepository->>SQLServer: SELECT IS_SRVROLEMEMBER('sysadmin')
-        SQLServer-->>SQLServerRepository: 1 (es sysadmin)
-        SQLServerRepository-->>LoginScreen: Conexión exitosa
-        LoginScreen->>Usuario: Mostrar Dashboard
-    else Usuario sin sysadmin
-        SQLServer-->>SQLServerRepository: Conexión OK
-        SQLServerRepository->>SQLServer: SELECT IS_SRVROLEMEMBER('sysadmin')
-        SQLServer-->>SQLServerRepository: 0 (no es sysadmin)
-        SQLServerRepository-->>LoginScreen: Permisos insuficientes
-        LoginScreen->>Usuario: Mostrar "Permisos insuficientes"
-    else Error de conexión
-        SQLServer-->>SQLServerRepository: Error de conexión
-        SQLServerRepository-->>LoginScreen: Error
-        LoginScreen->>Usuario: Mostrar "Error de conexión"
+    Note over BP: Hilo de trabajo independiente
+
+    BP->>CS: get_connector(config: ConnectionConfig)
+    CS-->>BP: connector: DatabaseConnector (instancia concreta)
+
+    BP->>LOG: info("Iniciando backup de {db} -> {path}")
+    LOG-->>UI: Actualiza terminal widget
+
+    BP->>DC: backup(db_name, output_path)
+    DC->>DB: Ejecuta comando de backup (BACKUP/mysqldump/pg_dump)
+    DB-->>DC: Archivo generado en output_path
+    DC-->>BP: True (éxito)
+
+    BP->>LOG: info("Backup generado correctamente.")
+    LOG-->>UI: Actualiza terminal widget
+
+    BP->>LOG: info("Iniciando validación automática...")
+    BP->>VS: validate_backup(connector, output_path, temp_db)
+
+    VS->>DC: create_temp_database(temp_db)
+    DC->>DB: CREATE DATABASE tmp_val_YYYYMMDDHHMMSS
+    DB-->>DC: OK
+    DC-->>VS: True
+
+    VS->>DC: restore(backup_file, temp_db)
+    DC->>DB: Restaura backup en base temporal
+    DB-->>DC: Restauración completa
+    DC-->>VS: True
+
+    VS->>DC: verify_tables(temp_db)
+    DC->>DB: SELECT tables FROM information_schema WHERE db=temp_db
+    DB-->>DC: Lista de tablas
+    DC-->>VS: True (tablas encontradas)
+
+    VS->>DC: drop_database(temp_db)
+    DC->>DB: DROP DATABASE tmp_val_YYYYMMDDHHMMSS
+    DB-->>DC: OK
+    DC-->>VS: True
+
+    VS-->>BP: Validación completada
+
+    BP->>LOG: info("Validación completada con éxito. Base temporal eliminada.")
+    BP->>BP: queue.put(("success", "Backup y validación exitosos."))
+
+    UI->>UI: Polling queue → resultado disponible
+    UI-->>Usuario: Muestra "✅ Backup y validación exitosos"
+    LOG-->>UI: Terminal actualizado con resumen completo
+```
+
+---
+
+### 3.2 Flujo de Conexión Segura y Validación de Credenciales Cifradas
+
+El siguiente diagrama muestra el flujo de autenticación segura, incluyendo la carga y descifrado de credenciales con Fernet, y la validación de la conexión al motor de base de datos seleccionado.
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant LW as LoginWindow<br/>(Presentation Layer)
+    participant SEC as security.py<br/>(Infrastructure Layer)
+    participant FS as FileSystem<br/>(~/.safebridge/)
+    participant CS as ConnectionService<br/>(Application Layer)
+    participant DC as DatabaseConnector<br/>(Infrastructure Layer)
+    participant DB as Motor de BD<br/>(Remoto/Local)
+
+    Note over LW,FS: Inicio de aplicación — carga de conexiones guardadas
+
+    LW->>SEC: load_connections()
+    SEC->>FS: ¿Existe connections.json.enc?
+    
+    alt Archivo existe
+        FS-->>SEC: Bytes cifrados
+        SEC->>SEC: _get_or_create_key() → lee fernet_key.key
+        SEC->>SEC: Fernet.decrypt(encrypted_bytes)
+        SEC->>SEC: json.loads(decrypted) → lista de conexiones
+        SEC-->>LW: [{"engine":"MySQL","host":"localhost",...}, ...]
+        LW-->>Usuario: Muestra lista de perfiles guardados
+    else Primer uso — sin conexiones
+        FS-->>SEC: Archivo no existe
+        SEC-->>LW: [] (lista vacía)
+        LW-->>Usuario: Muestra formulario vacío para nueva conexión
     end
+
+    Note over LW,DB: Usuario selecciona perfil y prueba conexión
+
+    Usuario->>LW: Selecciona perfil "MySQL - localhost"
+    Usuario->>LW: (Opcionalmente) ingresa contraseña si no fue guardada
+    Usuario->>LW: Clic en "Probar Conexión"
+
+    LW->>CS: get_connector(ConnectionConfig(engine=MYSQL, host, port, user, password))
+    CS->>CS: Factory → instancia MySQLConnector(config)
+    CS-->>LW: connector: MySQLConnector
+
+    LW->>DC: test_connection()
+    DC->>DB: Intento de conexión TCP/IP con credenciales
+    
+    alt Credenciales válidas
+        DB-->>DC: Conexión establecida
+        DC-->>LW: True
+        LW-->>Usuario: "✅ Conexión exitosa"
+        LW->>DC: get_databases()
+        DC->>DB: SHOW DATABASES / SELECT catalog_name...
+        DB-->>DC: ["produccion_db", "test_db", "staging_db"]
+        DC-->>LW: Lista de bases de datos
+        LW-->>Usuario: Puebla combobox con BDs disponibles
+    else Credenciales inválidas
+        DB-->>DC: Exception (autenticación fallida)
+        DC-->>LW: Lanza excepción con mensaje descriptivo
+        LW-->>Usuario: "❌ Error: Access denied for user 'root'@'localhost'"
+    end
+
+    Note over LW,FS: El usuario guarda la conexión cifrada
+
+    Usuario->>LW: Clic en "Guardar Conexión"
+    LW->>SEC: save_connections([{"engine":"MySQL","host":"localhost","user":"root","password":"***"}])
+    SEC->>SEC: _get_or_create_key() → genera/lee fernet_key.key
+    SEC->>SEC: json.dumps(connections_list).encode("utf-8")
+    SEC->>SEC: Fernet.encrypt(json_bytes) → encrypted_bytes
+    SEC->>FS: Escribe connections.json.enc (bytes cifrados)
+    FS-->>SEC: OK
+    SEC-->>LW: Guardado exitoso
+    LW-->>Usuario: "✅ Conexión guardada de forma segura"
+```
+
+<div style="page-break-after: always; visibility: hidden"></div>
+
+---
+
+## 4. Conclusiones
+
+Las cinco historias de usuario definidas en este documento cubren el núcleo funcional de SafeBridge, abordando los flujos críticos de conexión, backup, validación, auditoría y seguridad. La especificación en formato Gherkin permite que estos requisitos sean directamente ejecutables como pruebas de aceptación automatizadas mediante herramientas como `behave` en Python, facilitando la integración con el pipeline de CI/CD.
+
+Los diagramas de secuencia revelan la correcta implementación de los principios de Clean Architecture: la capa de presentación no interactúa directamente con la infraestructura de base de datos; toda comunicación pasa por los servicios de aplicación (`BackupProcess`, `ConnectionService`, `ValidationService`) que delegan en los conectores concretos a través de la interfaz abstracta `DatabaseConnector`. La comunicación asíncrona mediante `threading.Thread` y `queue.Queue` garantiza que la experiencia de usuario no se vea comprometida durante operaciones de larga duración.
+
+El flujo de seguridad muestra cómo el cifrado Fernet actúa como capa defensiva transversal, garantizando que las credenciales nunca se expongan en texto claro, incluso en caso de acceso no autorizado al sistema de archivos del usuario.
+
+---
+
+*Documento generado por el equipo BitCraft Solutions — Universidad Privada de Tacna, FAING-EPIS, Ciclo 2026-I.*
